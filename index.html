@@ -1,1277 +1,698 @@
 <!DOCTYPE html>
-
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ASTRO | Персональный астрологический прогноз</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;min-height:100%}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Хиромантия — скан ладони</title>
+  <style>
+    :root {
+      --bg: #090909;
+      --bg-soft: #111111;
+      --card: rgba(18, 18, 18, 0.92);
+      --line: rgba(201, 168, 76, 0.24);
+      --line-strong: rgba(201, 168, 76, 0.52);
+      --gold: #c9a84c;
+      --gold-soft: #f5e7c8;
+      --text: #f6f0e4;
+      --muted: #c7bda8;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+      --radius: 6px;
+    }
 
-body{
-background:#07091a;
-color:#fff;
-font-family:‘Montserrat’,sans-serif;
-font-size:16px;
-overflow-x:hidden;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-/* Starfield */
-body::before{
-content:’’;
-position:fixed;inset:0;
-background:
-radial-gradient(ellipse at 15% 40%,rgba(184,149,106,0.12) 0%,transparent 55%),
-radial-gradient(ellipse at 85% 75%,rgba(100,60,180,0.08) 0%,transparent 55%),
-radial-gradient(ellipse at 50% 10%,rgba(120,80,200,0.06) 0%,transparent 40%);
-pointer-events:none;z-index:0;
-}
+    html {
+      scroll-behavior: smooth;
+    }
 
-.stars-bg{
-position:fixed;inset:0;
-background-image:
-radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,0.18) 0%,transparent 100%),
-radial-gradient(1.5px 1.5px at 25% 60%,rgba(255,255,255,0.13) 0%,transparent 100%),
-radial-gradient(1px 1px at 40% 30%,rgba(255,255,255,0.2) 0%,transparent 100%),
-radial-gradient(1px 1px at 55% 80%,rgba(255,255,255,0.15) 0%,transparent 100%),
-radial-gradient(2px 2px at 70% 20%,rgba(255,255,255,0.1) 0%,transparent 100%),
-radial-gradient(1px 1px at 85% 50%,rgba(255,255,255,0.18) 0%,transparent 100%),
-radial-gradient(1.5px 1.5px at 92% 85%,rgba(255,255,255,0.12) 0%,transparent 100%),
-radial-gradient(1px 1px at 5% 90%,rgba(255,255,255,0.16) 0%,transparent 100%),
-radial-gradient(1px 1px at 60% 45%,rgba(255,255,255,0.14) 0%,transparent 100%),
-radial-gradient(1.5px 1.5px at 33% 75%,rgba(255,255,255,0.11) 0%,transparent 100%),
-radial-gradient(1px 1px at 78% 38%,rgba(255,255,255,0.17) 0%,transparent 100%),
-radial-gradient(1px 1px at 48% 12%,rgba(255,255,255,0.19) 0%,transparent 100%);
-pointer-events:none;z-index:0;
-}
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(201, 168, 76, 0.08), transparent 30%),
+        linear-gradient(180deg, #070707 0%, #0b0b0b 100%);
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.6;
+    }
 
-.wrapper{
-position:relative;z-index:1;
-display:flex;flex-direction:column;
-min-height:100vh;
-}
+    .page {
+      width: min(100%, 860px);
+      margin: 0 auto;
+      padding: 28px 18px 64px;
+    }
 
-/* HEADER */
-header{
-padding:36px 20px 28px;
-text-align:center;
-border-bottom:1px solid rgba(184,149,106,0.25);
-background:linear-gradient(180deg,rgba(7,9,26,0.9) 0%,rgba(7,9,26,0.4) 100%);
-backdrop-filter:blur(12px);
-position:sticky;top:0;z-index:100;
-}
-.logo{
-font-family:‘Playfair Display’,serif;
-font-size:3rem;font-weight:700;
-background:linear-gradient(135deg,#c8b47a 0%,#f0d98a 45%,#b8956a 100%);
--webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-letter-spacing:3px;margin-bottom:8px;
-animation:float 4s ease-in-out infinite;
-}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.tagline{
-color:rgba(184,149,106,0.7);
-font-size:0.75rem;letter-spacing:4px;text-transform:uppercase;font-weight:300;
-}
+    .hero {
+      text-align: center;
+      padding: 22px 0 26px;
+    }
 
-/* MODE SELECTOR */
-.mode-selector{
-display:none;flex:1;
-flex-direction:column;justify-content:center;align-items:center;
-padding:60px 20px;text-align:center;
-}
-.mode-selector.active{display:flex}
-.mode-title{
-font-family:‘Playfair Display’,serif;
-font-size:2.2rem;color:#d4c5a0;margin-bottom:50px;font-weight:600;
-}
-.mode-buttons{
-display:grid;grid-template-columns:1fr 1fr;
-gap:28px;max-width:580px;width:100%;
-}
-.mode-btn{
-padding:44px 20px;
-background:linear-gradient(135deg,rgba(184,149,106,0.08) 0%,rgba(212,197,160,0.03) 100%);
-border:1.5px solid rgba(184,149,106,0.4);
-color:#d4c5a0;
-font-family:‘Playfair Display’,serif;
-font-size:1.4rem;font-weight:600;
-cursor:pointer;text-transform:uppercase;
-transition:all 0.4s;backdrop-filter:blur(10px);
-border-radius:10px;overflow:hidden;
-position:relative;
-}
-.mode-btn:hover{
-background:linear-gradient(135deg,rgba(184,149,106,0.2) 0%,rgba(212,197,160,0.1) 100%);
-border-color:#d4c5a0;transform:translateY(-6px);
-box-shadow:0 15px 50px rgba(212,197,160,0.15);
-}
-.mode-btn .icon{display:block;font-size:2.5rem;margin-bottom:12px}
+    .eyebrow {
+      color: var(--gold);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
 
-/* CONTENT */
-.content{display:none;flex:1;padding:28px 16px;overflow-y:auto}
-.content.active{display:flex;flex-direction:column}
+    .title {
+      margin: 0;
+      font-size: clamp(34px, 6vw, 58px);
+      line-height: 1.05;
+      color: var(--gold-soft);
+      font-weight: 500;
+    }
 
-.mode-header{
-display:flex;justify-content:space-between;align-items:center;
-margin-bottom:28px;padding-bottom:18px;
-border-bottom:1px solid rgba(184,149,106,0.25);
-}
-.mode-label{
-font-family:‘Playfair Display’,serif;
-font-size:1.8rem;color:#d4c5a0;font-weight:600;
-}
-.btn-back{
-background:transparent;color:#b8956a;
-border:1.5px solid rgba(184,149,106,0.4);
-padding:9px 16px;font-size:0.75rem;font-weight:600;
-cursor:pointer;text-transform:uppercase;
-border-radius:6px;transition:all 0.3s;
-font-family:‘Montserrat’,sans-serif;letter-spacing:0.5px;
-}
-.btn-back:hover{border-color:#d4c5a0;color:#d4c5a0;transform:translateY(-2px)}
+    .subtitle {
+      margin: 16px auto 0;
+      max-width: 44ch;
+      color: var(--muted);
+      font-size: 18px;
+    }
 
-/* FORM */
-.form-grid{
-display:grid;grid-template-columns:1fr;gap:24px;margin-bottom:20px;
-}
-@media(min-width:800px){.form-grid{grid-template-columns:360px 1fr;gap:36px}}
+    .card {
+      background: linear-gradient(180deg, rgba(24,24,24,0.94), rgba(12,12,12,0.96));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      backdrop-filter: blur(10px);
+    }
 
-.form-section{display:flex;flex-direction:column;gap:14px}
-.section-title{
-font-family:‘Playfair Display’,serif;
-font-size:1.15rem;color:#d4c5a0;margin-bottom:4px;font-weight:600;
-}
-.form-group{display:flex;flex-direction:column;gap:5px}
-label{
-font-size:0.72rem;text-transform:uppercase;
-color:#b8956a;font-weight:500;letter-spacing:0.6px;
-}
-input[type=date],input[type=time],input[type=text]{
-width:100%;padding:11px 15px;
-background:rgba(184,149,106,0.07);
-border:1.5px solid rgba(184,149,106,0.35);
-color:#fff;font-family:‘Montserrat’,sans-serif;
-font-size:0.92rem;outline:none;border-radius:7px;
-transition:all 0.3s;
-}
-input:focus{
-background:rgba(184,149,106,0.12);
-border-color:rgba(212,197,160,0.7);
-box-shadow:0 0 18px rgba(212,197,160,0.1);
-}
-input::placeholder{color:rgba(255,255,255,0.3)}
+    .section-title {
+      margin: 0 0 18px;
+      font-size: 24px;
+      color: var(--gold-soft);
+      font-weight: 500;
+    }
 
-/* DATE SELECTS */
-.date-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.time-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-select{
-width:100%;padding:11px 12px;
-background:rgba(184,149,106,0.07);
-border:1.5px solid rgba(184,149,106,0.35);
-color:#fff;font-family:‘Montserrat’,sans-serif;
-font-size:0.88rem;outline:none;border-radius:7px;
-transition:all 0.3s;cursor:pointer;
--webkit-appearance:none;
-background-image:url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘12’ height=‘8’ viewBox=‘0 0 12 8’%3E%3Cpath d=‘M1 1l5 5 5-5’ stroke=’%23b8956a’ stroke-width=‘1.5’ fill=‘none’ stroke-linecap=‘round’/%3E%3C/svg%3E”);
-background-repeat:no-repeat;
-background-position:right 12px center;
-padding-right:32px;
-}
-select:focus{border-color:rgba(212,197,160,0.7)}
-select option{background:#0e1128;color:#fff}
+    .form-grid {
+      display: grid;
+      gap: 18px;
+    }
 
-.periods{
-display:grid;grid-template-columns:repeat(4,1fr);
-gap:6px;margin-top:8px;padding-top:10px;
-border-top:1px solid rgba(184,149,106,0.18);
-}
-.period-btn{
-padding:8px 4px;background:transparent;
-border:1.5px solid rgba(184,149,106,0.35);
-color:rgba(184,149,106,0.8);
-font-size:0.72rem;font-weight:600;
-cursor:pointer;text-transform:uppercase;
-border-radius:5px;transition:all 0.3s;
-font-family:‘Montserrat’,sans-serif;letter-spacing:0.3px;
-}
-.period-btn:hover{border-color:#d4c5a0;color:#d4c5a0}
-.period-btn.active{
-background:linear-gradient(135deg,#b8956a 0%,#d4c5a0 100%);
-color:#07091a;border-color:#d4c5a0;
-}
-.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.btn{
-padding:12px 14px;border:none;
-font-family:‘Montserrat’,sans-serif;
-font-size:0.82rem;font-weight:600;
-cursor:pointer;text-transform:uppercase;
-border-radius:7px;transition:all 0.3s;letter-spacing:0.5px;
-}
-.btn-calc{
-background:linear-gradient(135deg,#b8956a 0%,#d4c5a0 100%);
-color:#07091a;box-shadow:0 5px 20px rgba(184,149,106,0.25);
-}
-.btn-calc:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(212,197,160,0.35)}
-.btn-clear{
-background:transparent;color:#b8956a;
-border:1.5px solid rgba(184,149,106,0.4);
-}
-.btn-clear:hover{background:rgba(184,149,106,0.08);color:#d4c5a0;border-color:#d4c5a0}
+    .control-group {
+      display: grid;
+      gap: 10px;
+    }
 
-/* CHART */
-.results{display:none}
-.results.active{display:block;animation:fadeUp 0.5s ease-out}
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .control-group label {
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
 
-.planet-grid{
-display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;
-}
-@media(min-width:480px){.planet-grid{grid-template-columns:repeat(3,1fr)}}
+    .file-input {
+      display: none;
+    }
 
-.planet-item{
-background:rgba(184,149,106,0.07);
-border:1px solid rgba(184,149,106,0.25);
-padding:14px 10px;text-align:center;
-border-radius:8px;transition:all 0.3s;
-}
-.planet-item:hover{border-color:rgba(212,197,160,0.5);transform:translateY(-2px)}
-.planet-emoji{font-size:1.3rem;margin-bottom:4px}
-.planet-name{font-size:0.65rem;color:#8a7a6a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
-.planet-sign{font-size:0.88rem;color:#d4c5a0;font-weight:500}
-.planet-deg{font-size:0.72rem;color:rgba(184,149,106,0.7)}
+    .upload-shell {
+      display: grid;
+      gap: 14px;
+    }
 
-.meta-card{
-background:rgba(184,149,106,0.06);
-border:1px solid rgba(184,149,106,0.2);
-padding:16px;border-radius:8px;margin-bottom:14px;
-}
-.meta-card p{font-size:0.82rem;color:#b8a898;line-height:1.6;margin-bottom:4px}
-.meta-card .note{font-size:0.72rem;color:rgba(184,149,106,0.5);margin-top:8px;font-style:italic}
+    .upload-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 54px;
+      padding: 14px 18px;
+      border: 1px dashed var(--line-strong);
+      background: rgba(201, 168, 76, 0.06);
+      color: var(--gold-soft);
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 17px;
+      transition: 180ms ease;
+    }
 
-/* ASPECTS */
-.aspects-section{margin-bottom:14px}
-.aspects-title{
-font-family:‘Playfair Display’,serif;
-font-size:1rem;color:#d4c5a0;margin-bottom:10px;font-weight:600;
-}
-.aspect-list{display:flex;flex-direction:column;gap:5px}
-.aspect-item{
-display:flex;align-items:center;gap:10px;
-background:rgba(184,149,106,0.05);
-border:1px solid rgba(184,149,106,0.15);
-padding:8px 12px;border-radius:6px;font-size:0.8rem;
-}
-.aspect-symbol{
-font-size:1rem;min-width:20px;text-align:center;
-}
-.aspect-text{color:#c8b89a;flex:1}
-.aspect-orb{color:rgba(184,149,106,0.6);font-size:0.72rem}
-.aspect-conj{border-left:3px solid #ffd700}
-.aspect-trine{border-left:3px solid #4caf50}
-.aspect-sext{border-left:3px solid #2196f3}
-.aspect-sq{border-left:3px solid #ff5722}
-.aspect-opp{border-left:3px solid #e91e63}
+    .upload-button:hover {
+      background: rgba(201, 168, 76, 0.12);
+      border-color: rgba(201, 168, 76, 0.7);
+    }
 
-/* HORO / AI SECTION */
-.horo-section{display:none;margin-top:24px}
-.horo-section.active{display:block}
+    .period-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
 
-.ai-block{
-background:linear-gradient(135deg,rgba(184,149,106,0.08) 0%,rgba(100,60,180,0.05) 100%);
-border:1.5px solid rgba(184,149,106,0.25);
-border-radius:10px;padding:22px;margin-bottom:16px;
-position:relative;overflow:hidden;
-}
-.ai-block::before{
-content:’’;position:absolute;top:0;left:0;right:0;height:2px;
-background:linear-gradient(90deg,transparent,#b8956a,#d4c5a0,#b8956a,transparent);
-}
-.ai-block-title{
-font-family:‘Playfair Display’,serif;
-font-size:1.05rem;color:#d4c5a0;margin-bottom:12px;font-weight:600;
-display:flex;align-items:center;gap:8px;
-}
-.ai-block-text{
-font-size:0.88rem;color:#ddd;line-height:1.85;white-space:pre-wrap;
-}
-.ai-stars{display:flex;gap:5px;margin-top:10px}
-.ai-star{font-size:1.1rem;color:#ffd700;filter:drop-shadow(0 0 3px rgba(255,215,0,0.4))}
-.ai-star.dim{color:rgba(255,255,255,0.15);filter:none}
+    .period-btn {
+      min-height: 52px;
+      border: 1px solid var(--line);
+      background: rgba(201, 168, 76, 0.03);
+      color: var(--gold-soft);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 12px 10px;
+      transition: 180ms ease;
+    }
 
-/* DAYS */
-.days-section{margin-top:20px}
-.days-grid{
-display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px;
-}
-.day-cell{
-background:rgba(184,149,106,0.06);
-border:1.5px solid rgba(184,149,106,0.2);
-padding:10px 4px;text-align:center;
-font-size:0.75rem;border-radius:6px;
-transition:all 0.3s;
-}
-.day-cell .dn{color:#8a7a6a;margin-bottom:4px;text-transform:uppercase;font-size:0.65rem}
-.day-cell .de{font-weight:600;font-size:0.82rem}
-.day-cell.good{border-color:rgba(76,175,80,0.5);background:rgba(76,175,80,0.08)}
-.day-cell.good .de{color:#81c784}
-.day-cell.neutral{border-color:rgba(255,193,7,0.4);background:rgba(255,193,7,0.05)}
-.day-cell.neutral .de{color:#ffd54f}
-.day-cell.bad{border-color:rgba(244,67,54,0.4);background:rgba(244,67,54,0.06)}
-.day-cell.bad .de{color:#e57373}
+    .period-btn:hover {
+      border-color: var(--line-strong);
+      background: rgba(201, 168, 76, 0.08);
+      transform: translateY(-1px);
+    }
 
-/* LOADING */
-.loader{
-display:none;align-items:center;justify-content:center;
-gap:12px;padding:28px;
-color:#b8956a;font-size:0.85rem;letter-spacing:1px;text-transform:uppercase;
-}
-.loader.active{display:flex}
-.spinner{
-width:22px;height:22px;border-radius:50%;
-border:2px solid rgba(184,149,106,0.2);
-border-top-color:#b8956a;
-animation:spin 0.8s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
+    .period-btn.active {
+      border-color: rgba(201, 168, 76, 0.8);
+      background: rgba(201, 168, 76, 0.16);
+      color: #fff6df;
+      box-shadow: 0 0 0 1px rgba(201, 168, 76, 0.18) inset;
+    }
 
-/* STREAMING CURSOR */
-.streaming::after{
-content:‘▋’;animation:blink 0.7s infinite;
-color:#b8956a;margin-left:2px;
-}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+    .fortune-select {
+      width: 100%;
+      min-height: 56px;
+      padding: 14px 16px;
+      background: rgba(10, 10, 10, 0.92);
+      color: var(--gold-soft);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      font-size: 18px;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--gold) 50%),
+        linear-gradient(135deg, var(--gold) 50%, transparent 50%);
+      background-position:
+        calc(100% - 22px) calc(50% - 3px),
+        calc(100% - 15px) calc(50% - 3px);
+      background-size: 7px 7px, 7px 7px;
+      background-repeat: no-repeat;
+    }
 
-.error-msg{
-background:rgba(244,67,54,0.1);
-border:1px solid rgba(244,67,54,0.3);
-color:#ef9a9a;padding:12px 16px;
-border-radius:8px;font-size:0.82rem;
-margin-top:12px;
-}
+    .fortune-select:focus {
+      border-color: rgba(201, 168, 76, 0.75);
+      box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+    }
 
-/* HOUSES GRID */
-.houses-grid{
-display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;
-}
-.house-item{
-background:rgba(184,149,106,0.04);
-border:1px solid rgba(184,149,106,0.15);
-padding:7px 10px;border-radius:5px;
-font-size:0.75rem;color:#a89888;
-}
-.house-item span{color:#d4c5a0;font-weight:500}
+    .scan-stage {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(201, 168, 76, 0.28);
+      background:
+        radial-gradient(circle at top, rgba(201,168,76,0.08), rgba(0,0,0,0.18) 45%, rgba(0,0,0,0.8) 100%);
+      min-height: 260px;
+      display: grid;
+      place-items: center;
+      border-radius: 4px;
+      box-shadow:
+        0 0 0 1px rgba(201, 168, 76, 0.06),
+        0 0 32px rgba(201, 168, 76, 0.05),
+        inset 0 0 24px rgba(201, 168, 76, 0.04);
+    }
 
-@media(max-width:480px){
-.logo{font-size:2.3rem}
-header{padding:24px 16px 18px}
-.content{padding:18px 12px}
-.mode-buttons{grid-template-columns:1fr;gap:16px}
-.days-grid{grid-template-columns:repeat(7,1fr);gap:4px}
-.day-cell{padding:8px 2px}
-}
-</style>
+    .scan-stage.is-scanning {
+      animation: framePulse 2.6s ease-in-out infinite;
+    }
 
+    .scan-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom,
+          rgba(255,255,255,0) 0%,
+          rgba(201,168,76,0.08) 46%,
+          rgba(201,168,76,0.34) 50%,
+          rgba(201,168,76,0.08) 54%,
+          rgba(255,255,255,0) 100%);
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .scan-stage.is-scanning::before {
+      opacity: 1;
+      animation: scanLine 2.2s linear infinite;
+    }
+
+    .scan-stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(201, 168, 76, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201, 168, 76, 0.08) 1px, transparent 1px);
+      background-size: 26px 26px;
+      mix-blend-mode: screen;
+      opacity: 0;
+    }
+
+    .scan-stage.is-scanning::after {
+      opacity: 0.4;
+      animation: gridPulse 1.8s ease-in-out infinite;
+    }
+
+    .scan-placeholder {
+      text-align: center;
+      color: var(--muted);
+      padding: 28px;
+      font-size: 17px;
+      max-width: 28ch;
+    }
+
+    .palm-image {
+      display: block;
+      width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      filter: saturate(0.92) contrast(1.04);
+      transition: transform 700ms ease, filter 700ms ease, opacity 400ms ease;
+    }
+
+    .scan-stage.is-scanning .palm-image {
+      transform: scale(1.02);
+      filter: saturate(1) contrast(1.12) brightness(1.03);
+    }
+
+    .scan-status {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+      color: var(--gold);
+      font-size: 14px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .scan-status.active {
+      display: flex;
+    }
+
+    .scan-dots {
+      display: inline-flex;
+      gap: 6px;
+    }
+
+    .scan-dots span {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(201, 168, 76, 0.98);
+      animation: dotPulse 1.2s infinite ease-in-out;
+    }
+
+    .scan-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .scan-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+    .cta {
+      min-height: 58px;
+      width: 100%;
+      border: 1px solid rgba(201, 168, 76, 0.48);
+      background: linear-gradient(180deg, rgba(201,168,76,0.18), rgba(201,168,76,0.08));
+      color: #fff7e7;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 18px;
+      letter-spacing: 0.03em;
+      transition: 180ms ease;
+    }
+
+    .cta:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(180deg, rgba(201,168,76,0.24), rgba(201,168,76,0.12));
+      box-shadow: 0 12px 28px rgba(201, 168, 76, 0.08);
+    }
+
+    .cta:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result-wrap {
+      margin-top: 24px;
+      display: none;
+    }
+
+    .result-wrap.visible {
+      display: block;
+      animation: revealResult 600ms ease;
+    }
+
+    .result-card {
+      background:
+        linear-gradient(135deg, rgba(201,168,76,0.06), rgba(201,168,76,0.015)),
+        rgba(12, 12, 12, 0.9);
+      border: 1px solid rgba(201, 168, 76, 0.22);
+      border-radius: 4px;
+      padding: 34px 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 1px;
+      background: linear-gradient(180deg, transparent, rgba(201,168,76,0.42), transparent);
+      opacity: 0.6;
+    }
+
+    .result-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .meta-chip {
+      border: 1px solid rgba(201, 168, 76, 0.2);
+      background: rgba(201, 168, 76, 0.06);
+      color: var(--gold);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .result-title {
+      margin: 0 0 18px;
+      font-size: clamp(28px, 4.4vw, 40px);
+      line-height: 1.12;
+      color: var(--gold-soft);
+      font-weight: 500;
+    }
+
+    .result-text {
+      font-size: clamp(19px, 2.2vw, 22px);
+      line-height: 1.92;
+      color: var(--text);
+      font-style: italic;
+      white-space: pre-wrap;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    @keyframes scanLine {
+      0% { transform: translateY(-110%); }
+      100% { transform: translateY(110%); }
+    }
+
+    @keyframes framePulse {
+      0%, 100% {
+        box-shadow:
+          0 0 0 1px rgba(201, 168, 76, 0.08),
+          0 0 24px rgba(201, 168, 76, 0.06),
+          inset 0 0 24px rgba(201, 168, 76, 0.03);
+      }
+      50% {
+        box-shadow:
+          0 0 0 1px rgba(201, 168, 76, 0.16),
+          0 0 42px rgba(201, 168, 76, 0.12),
+          inset 0 0 28px rgba(201, 168, 76, 0.08);
+      }
+    }
+
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.18; }
+      50% { opacity: 0.4; }
+    }
+
+    @keyframes dotPulse {
+      0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.45;
+      }
+      40% {
+        transform: scale(1.15);
+        opacity: 1;
+      }
+    }
+
+    @keyframes revealResult {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        padding: 18px 14px 44px;
+      }
+
+      .card {
+        padding: 18px;
+      }
+
+      .period-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .result-card {
+        padding: 24px 20px;
+      }
+
+      .result-text {
+        font-size: 20px;
+        line-height: 1.86;
+      }
+
+      .scan-stage {
+        min-height: 220px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="stars-bg"></div>
-<div class="wrapper">
-  <header>
-    <div class="logo">✦ ASTRO ✦</div>
-    <p class="tagline">Персональный астрологический прогноз</p>
-  </header>
+  <main class="page">
+    <section class="hero">
+      <div class="eyebrow">Хиромантия и предвидение</div>
+      <h1 class="title">Скан ладони</h1>
+      <p class="subtitle">
+        Загрузите фото ладони, выберите период и аспект жизни — и получите мистическое предсказание на ближайшее будущее.
+      </p>
+    </section>
 
-  <!-- MODE SELECTOR -->
+    <section class="card">
+      <h2 class="section-title">Начать чтение</h2>
 
-  <div id="modeSelect" class="mode-selector active">
-    <div class="mode-title">Выберите свой путь</div>
-    <div class="mode-buttons">
-      <button type="button" class="mode-btn" onclick="startMode('p')">
-        <span class="icon">💫</span>Личный<br>гороскоп
-      </button>
-      <button type="button" class="mode-btn" onclick="startMode('b')">
-        <span class="icon">📈</span>Бизнес<br>анализ
-      </button>
-    </div>
-  </div>
-
-  <!-- PERSONAL -->
-
-  <div id="personal" class="content">
-    <div class="mode-header">
-      <div class="mode-label">💫 Личный гороскоп</div>
-      <button type="button" class="btn-back" onclick="backMode()">← Назад</button>
-    </div>
-    <div class="form-grid">
-      <form id="pForm" class="form-section" onsubmit="calcMode(event,'p')">
-        <div class="section-title">Ваши данные</div>
-        <div class="form-group">
-          <label>Дата рождения *</label>
-          <div class="date-row">
-            <select id="pDay"></select>
-            <select id="pMonth"></select>
-            <select id="pYear"></select>
+      <div class="form-grid">
+        <div class="control-group">
+          <label for="palmUpload">Фото ладони</label>
+          <div class="upload-shell">
+            <label class="upload-button" for="palmUpload">Загрузить изображение ладони</label>
+            <input class="file-input" type="file" id="palmUpload" accept="image/*" />
+            <div class="hint">Лучше всего работает чёткое фото раскрытой ладони при хорошем свете.</div>
           </div>
         </div>
-        <div class="form-group">
-          <label>Время рождения</label>
-          <div class="time-row">
-            <select id="pHour"></select>
-            <select id="pMin"></select>
+
+        <div class="control-group">
+          <label>Период</label>
+          <div class="period-grid" id="periodGrid">
+            <button type="button" class="period-btn active" data-period="Завтра">Завтра</button>
+            <button type="button" class="period-btn" data-period="Неделя">Неделя</button>
+            <button type="button" class="period-btn" data-period="Месяц">Месяц</button>
+            <button type="button" class="period-btn" data-period="Год">Год</button>
           </div>
         </div>
-        <div class="form-group">
-          <label>Место рождения *</label>
-          <input type="text" id="pPlace" placeholder="Введите город" required>
+
+        <div class="control-group">
+          <label for="aspectSelect">Аспект жизни</label>
+          <select id="aspectSelect" class="fortune-select">
+            <option value="Любовь">Любовь</option>
+            <option value="Карьера">Карьера</option>
+            <option value="Финансы">Финансы</option>
+            <option value="Здоровье">Здоровье</option>
+            <option value="Судьба">Судьба</option>
+            <option value="Энергия">Энергия</option>
+            <option value="Отношения">Отношения</option>
+            <option value="Личный путь">Личный путь</option>
+            <option value="Удача дня">Удача дня</option>
+          </select>
         </div>
-        <div class="form-group">
-          <label>Имя</label>
-          <input type="text" id="pName" placeholder="Ваше имя (необязательно)">
-        </div>
-        <div class="periods">
-          <button type="button" class="period-btn active" data-p="today">Сегодня</button>
-          <button type="button" class="period-btn" data-p="tomorrow">Завтра</button>
-          <button type="button" class="period-btn" data-p="week">Неделя</button>
-          <button type="button" class="period-btn" data-p="month">Месяц</button>
-        </div>
-        <div class="buttons">
-          <button type="submit" class="btn btn-calc" id="pCalcBtn">✨ Рассчитать</button>
-          <button type="button" class="btn btn-clear" onclick="clearMode('p')">Очистить</button>
-        </div>
-      </form>
 
-```
-  <div>
-    <div class="results" id="pRes">
-      <div class="section-title">Натальная карта</div>
-      <div class="planet-grid" id="pPlanets"></div>
-      <div class="meta-card" id="pMeta"></div>
-      <div class="aspects-section">
-        <div class="aspects-title">Ключевые транзитные аспекты</div>
-        <div class="aspect-list" id="pAspects"></div>
-      </div>
-      <div class="aspects-section">
-        <div class="aspects-title">Система домов (Плацидус)</div>
-        <div class="houses-grid" id="pHouses"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="loader" id="pLoader">
-  <div class="spinner"></div>
-  <span>Строю ваш гороскоп...</span>
-</div>
-
-<div class="horo-section" id="pHoro">
-  <div class="section-title" style="margin-bottom:16px">Ваш персональный прогноз</div>
-  <div id="pCards"></div>
-  <div class="days-section">
-    <div class="section-title">Энергия по дням</div>
-    <div class="days-grid" id="pDays"></div>
-  </div>
-</div>
-<div class="error-msg" id="pError" style="display:none"></div>
-```
-
-  </div>
-
-  <!-- BUSINESS -->
-
-  <div id="business" class="content">
-    <div class="mode-header">
-      <div class="mode-label">📈 Бизнес анализ</div>
-      <button type="button" class="btn-back" onclick="backMode()">← Назад</button>
-    </div>
-    <div class="form-grid">
-      <form id="bForm" class="form-section" onsubmit="calcMode(event,'b')">
-        <div class="section-title">Ваши данные</div>
-        <div class="form-group">
-          <label>Дата рождения *</label>
-          <div class="date-row">
-            <select id="bDay"></select>
-            <select id="bMonth"></select>
-            <select id="bYear"></select>
+        <div class="control-group">
+          <label>Зона скана</label>
+          <div class="scan-stage" id="scanStage">
+            <div class="scan-placeholder" id="scanPlaceholder">
+              Здесь появится ваша ладонь. После запуска анализа изображение будет считано световой линией.
+            </div>
+            <img id="palmPreview" class="palm-image" src="" alt="Загруженная ладонь" hidden />
+          </div>
+          <div class="scan-status" id="scanStatus">
+            <span>Считываем линии ладони</span>
+            <span class="scan-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
           </div>
         </div>
-        <div class="form-group">
-          <label>Время рождения</label>
-          <div class="time-row">
-            <select id="bHour"></select>
-            <select id="bMin"></select>
+
+        <button type="button" class="cta" id="analyzeBtn">Получить предсказание</button>
+      </div>
+
+      <div class="result-wrap" id="resultWrap">
+        <div class="result-card">
+          <div class="result-meta">
+            <span class="meta-chip" id="metaPeriod">Завтра</span>
+            <span class="meta-chip" id="metaAspect">Любовь</span>
           </div>
+          <h3 class="result-title" id="resultTitle">Ваше предсказание</h3>
+          <div class="result-text" id="resultText"></div>
         </div>
-        <div class="form-group">
-          <label>Место рождения *</label>
-          <input type="text" id="bPlace" placeholder="Введите город" required>
-        </div>
-        <div class="form-group">
-          <label>Имя</label>
-          <input type="text" id="bName" placeholder="Ваше имя (необязательно)">
-        </div>
-        <div class="periods">
-          <button type="button" class="period-btn active" data-p="today">Сегодня</button>
-          <button type="button" class="period-btn" data-p="tomorrow">Завтра</button>
-          <button type="button" class="period-btn" data-p="week">Неделя</button>
-          <button type="button" class="period-btn" data-p="month">Месяц</button>
-        </div>
-        <div class="buttons">
-          <button type="submit" class="btn btn-calc" id="bCalcBtn">✨ Рассчитать</button>
-          <button type="button" class="btn btn-clear" onclick="clearMode('b')">Очистить</button>
-        </div>
-      </form>
-
-```
-  <div>
-    <div class="results" id="bRes">
-      <div class="section-title">Натальная карта</div>
-      <div class="planet-grid" id="bPlanets"></div>
-      <div class="meta-card" id="bMeta"></div>
-      <div class="aspects-section">
-        <div class="aspects-title">Ключевые транзитные аспекты</div>
-        <div class="aspect-list" id="bAspects"></div>
       </div>
-      <div class="aspects-section">
-        <div class="aspects-title">Система домов (Плацидус)</div>
-        <div class="houses-grid" id="bHouses"></div>
-      </div>
-    </div>
-  </div>
-</div>
+    </section>
+  </main>
 
-<div class="loader" id="bLoader">
-  <div class="spinner"></div>
-  <span>Строю бизнес-прогноз...</span>
-</div>
+  <script>
+    const palmUpload = document.getElementById('palmUpload');
+    const palmPreview = document.getElementById('palmPreview');
+    const scanPlaceholder = document.getElementById('scanPlaceholder');
+    const scanStage = document.getElementById('scanStage');
+    const scanStatus = document.getElementById('scanStatus');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const aspectSelect = document.getElementById('aspectSelect');
+    const resultWrap = document.getElementById('resultWrap');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultText = document.getElementById('resultText');
+    const metaPeriod = document.getElementById('metaPeriod');
+    const metaAspect = document.getElementById('metaAspect');
+    const periodButtons = [...document.querySelectorAll('.period-btn')];
 
-<div class="horo-section" id="bHoro">
-  <div class="section-title" style="margin-bottom:16px">Бизнес прогноз</div>
-  <div id="bCards"></div>
-  <div class="days-section">
-    <div class="section-title">Энергия по дням</div>
-    <div class="days-grid" id="bDays"></div>
-  </div>
-</div>
-<div class="error-msg" id="bError" style="display:none"></div>
-```
+    let selectedPeriod = 'Завтра';
+    let imageLoaded = false;
 
-  </div>
-</div>
+    const predictions = {
+      'Завтра': {
+        'Любовь': 'Завтра сердце станет особенно чутким к полутонам. То, что раньше казалось неясным, проявится в простом жесте, взгляде или сообщении.\n\nНе торопите чувства — нужный ответ придёт мягко. День благоприятен для откровенного разговора и для тёплого сближения.',
+        'Карьера': 'Завтра в рабочей сфере появится момент, где многое решит не сила, а точность. Один короткий шаг способен открыть дверь, которую вы давно считали закрытой.\n\nСлушайте интуицию в деталях и не откладывайте важный ответ. Удача будет на стороне тех, кто действует спокойно.',
+        'Финансы': 'Завтра денежная энергия будет подсказывать осторожность и разумный выбор. Возможна небольшая, но важная подсказка о том, куда не стоит сливать силы и ресурсы.\n\nХороший день для наведения порядка, отказа от лишнего и маленького полезного решения.',
+        'Здоровье': 'Завтра тело тонко отзовётся на ваше внутреннее состояние. Если дать себе чуть больше тишины, воды и отдыха, появится ощущение восстановления.\n\nНе перегружайте день лишней суетой. Внимание к себе даст больше, чем попытка всё успеть.',
+        'Судьба': 'Завтра пространство подаст знак через случайность, которую нельзя будет назвать случайной. Встреча, фраза или внезапная мысль укажут направление.\n\nБудьте внимательны к повторяющимся символам. Они ведут вас туда, где начинается новый виток пути.',
+        'Энергия': 'Завтра жизненный поток может меняться волнами: утром — рассеянность, ближе к вечеру — подъём и ясность. Не тратьте силы на то, что не откликается.\n\nЛучше выбрать одно важное действие и сделать его с полной собранностью.',
+        'Отношения': 'Завтра отношения потребуют мягкости и умения услышать между строк. Чужая реакция может оказаться не отказом, а просьбой о бережности.\n\nЕсли не давить и не спорить, вы получите гораздо больше тепла и честности.',
+        'Личный путь': 'Завтра вы яснее почувствуете, что действительно ваше, а что давно пора отпустить. Это день маленького внутреннего разворота.\n\nНе бойтесь признать правду перед собой. Именно она сейчас открывает верную дорогу.',
+        'Удача дня': 'Завтра удача придёт не шумно, а почти незаметно. Она проявится в совпадении, удачном времени и своевременной мысли.\n\nЧем спокойнее вы будете, тем легче распознаете момент, когда стоит действовать.'
+      },
+      'Неделя': {
+        'Любовь': 'Эта неделя раскрывает тему сближения и душевной честности. Всё, что строится на искренности, будет укрепляться, а всё неустойчивое начнёт показывать истинное лицо.\n\nНе бойтесь говорить о чувствах мягко и прямо. Любовная энергия недели поддерживает зрелый диалог.',
+        'Карьера': 'Неделя несёт шанс на укрепление позиций и важный поворот в делах. Вас могут заметить там, где раньше вы оставались в тени.\n\nСосредоточьтесь на качестве, а не на количестве. Один хорошо сделанный шаг даст больше, чем десять суетливых движений.',
+        'Финансы': 'Финансовая тема недели просит собранности и ясного взгляда. Возможна полезная идея, как перераспределить ресурсы в свою пользу.\n\nИзбегайте эмоциональных трат. Неделя хороша для расчёта, планирования и разумной экономии.',
+        'Здоровье': 'На этой неделе тело будет напоминать о балансе. Если вы давно игнорировали усталость, сейчас важно вернуть себе ритм сна, покоя и восстановления.\n\nПоддержка придёт через простые вещи: режим, прогулки, дыхание, меньше перегруза.',
+        'Судьба': 'Неделя может принести ощущение, что события выстраиваются в единую цепь. Что-то, казавшееся случайным, начнёт складываться в знак.\n\nНе отталкивайте неожиданные приглашения и новые идеи. В них уже спрятан следующий поворот судьбы.',
+        'Энергия': 'Энергия недели сначала будет собираться, а затем начнёт расти. Самые сильные дни придут после внутренней паузы и переоценки.\n\nВажно не расплескать силы в первые дни. Берегите импульс для действительно нужного шага.',
+        'Отношения': 'Неделя поможет многое прояснить в близких связях. Где есть доверие — появится тепло, где есть недосказанность — всплывёт важный разговор.\n\nСохраняйте уважительный тон и не спешите с выводами. В отношениях сейчас важна глубина, а не реакция.',
+        'Личный путь': 'Эта неделя зовёт к внутренней настройке. Вы начнёте яснее понимать, какую роль больше не хотите играть и куда действительно хотите идти.\n\nПолезно вернуться к давнему желанию, которое вы откладывали. Оно снова подаёт голос не случайно.',
+        'Удача дня': 'В течение недели удача будет включаться точечно — в нужных знакомствах, верных словах и правильном тайминге. Особенно важно ловить момент, а не форсировать процесс.\n\nЛучший союзник сейчас — спокойная внимательность.'
+      },
+      'Месяц': {
+        'Любовь': 'Месяц принесёт постепенное раскрытие чувств и глубокую переоценку личной близости. Старые эмоции могут отступить, освобождая место для более зрелого и ясного союза.\n\nВ любви важнее будет не вспышка, а устойчивость. Слушайте сердце, но не забывайте о достоинстве.',
+        'Карьера': 'Месяц обещает движение в сторону укрепления статуса и понимания своей ценности. Возможно предложение, проект или разговор, меняющий ваш рабочий горизонт.\n\nНе бойтесь заявить о себе достойно. Этот период даёт шанс занять более сильную позицию.',
+        'Финансы': 'Финансовая линия месяца говорит о необходимости порядка и взросления. Появится возможность увидеть, где теряется ресурс и где его можно удержать.\n\nЛучшее решение — строить базу, а не искать мгновенную выгоду. Тогда деньги начнут работать спокойнее.',
+        'Здоровье': 'Месяц просит заботы о теле как о храме внутренней силы. Если замедлиться и убрать лишнее, начнётся заметное восстановление.\n\nХорошо подойдут ритуалы стабильности: сон, вода, ритм, питание, снижение перегруза.',
+        'Судьба': 'Месяц может стать переходным. Один внутренний выбор начнёт менять не только настроение, но и сами обстоятельства вокруг вас.\n\nОбращайте внимание на повторяющиеся темы. Судьба будет говорить через то, что возвращается снова.',
+        'Энергия': 'Энергия месяца нарастает по спирали. Сначала нужно отпустить истощающие вещи, затем освободившийся поток направить на своё.\n\nНе рассеивайтесь. Ваш ресурс будет особенно силён там, где есть смысл и личная вовлечённость.',
+        'Отношения': 'В отношениях месяц принесёт прояснение и проверку на глубину. Ненужное станет слабее, подлинное — сильнее.\n\nВажно говорить честно, но без резкости. Сейчас можно исцелить многое, если действовать бережно.',
+        'Личный путь': 'Этот месяц помогает вернуться к своему настоящему направлению. Вы начнёте различать чужие ожидания и собственный внутренний зов.\n\nСделайте хотя бы один шаг к тому, что давно считаете своим путём. Этого будет достаточно, чтобы сдвинуть судьбу.',
+        'Удача дня': 'Удача месяца не случайна: она будет приходить к вам там, где есть внутренняя собранность и готовность принять шанс. Особенно важны дни, когда всё складывается слишком красиво, чтобы это игнорировать.\n\nНе сомневайтесь в благоприятном стечении обстоятельств — иногда именно так открываются двери.'
+      },
+      'Год': {
+        'Любовь': 'Этот год несёт глубокую трансформацию в сфере чувств. Он учит выбирать не иллюзию, а подлинную близость, не зависимость, а живой союз.\n\nЛюбовь будет проверяться временем, зрелостью и честностью. Всё настоящее укрепится.',
+        'Карьера': 'Год даёт шанс выйти на новый уровень понимания своей ценности и предназначения в работе. Возможно крупное изменение курса, которое сначала покажется рискованным, а потом окажется верным.\n\nГлавная сила года — в последовательности. То, что вы будете строить спокойно, станет прочным.',
+        'Финансы': 'Финансовая линия года связана с выстраиванием базы и освобождением от хаоса. Это время не про случайную удачу, а про создание устойчивости.\n\nЕсли относиться к деньгам осознанно, к концу года вы увидите, насколько изменилось внутреннее чувство опоры.',
+        'Здоровье': 'Год просит серьёзнее услышать тело и перестать относиться к себе как к бесконечному ресурсу. Через режим, внимание и заботу вы можете вернуть много энергии.\n\nЧем бережнее вы к себе, тем сильнее будет общий жизненный поток.',
+        'Судьба': 'Это год развилки и взросления. Одни двери закроются без сожаления, потому что готовится путь, который ближе вашей настоящей природе.\n\nНе бойтесь отпускать старые формы. Судьба ведёт вас к более точному соответствию себе.',
+        'Энергия': 'Год будет неравномерным, но очень значимым по энергетике. Периоды тишины окажутся не пустотой, а накоплением силы перед важными этапами.\n\nСекрет года — не выгорать в суете. Беречь энергию сейчас важнее, чем постоянно доказывать свою мощь.',
+        'Отношения': 'В отношениях год отделит поверхностное от настоящего. Кто рядом по любви и уважению — останется ближе, чем прежде; кто держался на привычке — начнёт отдаляться.\n\nЭтот год учит строить связи без лжи и без внутреннего унижения себя.',
+        'Личный путь': 'Год станет временем внутреннего возвращения к себе. Вы всё отчётливее будете чувствовать, в чём ваше направление, а что было лишь чужой дорогой.\n\nДаже если путь пока не до конца ясен, вы уже стоите у его настоящего начала.',
+        'Удача дня': 'Удача года приходит как ответ на готовность действовать в согласии с собой. Чем меньше вы предаёте собственное ощущение истины, тем чаще обстоятельства будут складываться в вашу пользу.\n\nЭтот год вознаграждает тех, кто идёт своим путём без лишнего шума.'
+      }
+    };
 
-<script>
-// ─── ZODIAC DATA ───────────────────────────────────────────────
-const SIGN_NAMES = ['Овен','Телец','Близнецы','Рак','Лев','Дева','Весы','Скорпион','Стрелец','Козерог','Водолей','Рыбы'];
-const SIGN_SYM   = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
-const MONTHS_RU  = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+    palmUpload.addEventListener('change', (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-const PLANET_INFO = {
-  sun:     {name:'Солнце',    emoji:'☀️'},
-  moon:    {name:'Луна',      emoji:'🌙'},
-  mercury: {name:'Меркурий',  emoji:'☿'},
-  venus:   {name:'Венера',    emoji:'♀'},
-  mars:    {name:'Марс',      emoji:'♂'},
-  jupiter: {name:'Юпитер',   emoji:'♃'},
-  saturn:  {name:'Сатурн',   emoji:'♄'},
-  uranus:  {name:'Уран',     emoji:'♅'},
-  neptune: {name:'Нептун',   emoji:'♆'},
-  pluto:   {name:'Плутон',   emoji:'♇'},
-  asc:     {name:'Асцендент',emoji:'⬆'}
-};
+      const reader = new FileReader();
+      reader.onload = () => {
+        palmPreview.src = reader.result;
+        palmPreview.hidden = false;
+        scanPlaceholder.hidden = true;
+        imageLoaded = true;
+      };
+      reader.readAsDataURL(file);
+    });
 
-// ─── INIT SELECTS ─────────────────────────────────────────────
-function initSelects(){
-  ['p','b'].forEach(m=>{
-    const dayEl=document.getElementById(m+'Day');
-    const monEl=document.getElementById(m+'Month');
-    const yrEl =document.getElementById(m+'Year');
-    const hrEl =document.getElementById(m+'Hour');
-    const mnEl =document.getElementById(m+'Min');
-
-    for(let i=1;i<=31;i++) dayEl.innerHTML+=`<option value="${i}">${i}</option>`;
-    MONTHS_RU.forEach((mn,i)=> monEl.innerHTML+=`<option value="${i+1}">${mn}</option>`);
-    const now=new Date();
-    for(let y=now.getFullYear()-80;y<=now.getFullYear()-10;y++)
-      yrEl.innerHTML+=`<option value="${y}"${y===1990?' selected':''}>${y}</option>`;
-    for(let h=0;h<24;h++) hrEl.innerHTML+=`<option value="${h}"${h===12?' selected':''}>${String(h).padStart(2,'0')}</option>`;
-    for(let mn=0;mn<60;mn+=5) mnEl.innerHTML+=`<option value="${mn}"${mn===0?' selected':''}>${String(mn).padStart(2,'0')}</option>`;
-  });
-}
-
-// ─── MATH HELPERS ────────────────────────────────────────────
-function norm(x){return((x%360)+360)%360}
-function r2d(r){return r*180/Math.PI}
-function d2r(d){return d*Math.PI/180}
-function jd(date){return date.getTime()/86400000+2440587.5}
-function T(jday){return(jday-2451545.0)/36525.0}
-
-function signOf(lon){
-  const s=Math.floor(norm(lon)/30);
-  return {idx:s,name:SIGN_NAMES[s],sym:SIGN_SYM[s],deg:norm(lon)%30};
-}
-function fmtSign(lon){
-  const s=signOf(lon);
-  return `${s.sym} ${s.name} ${s.deg.toFixed(1)}°`;
-}
-
-// ─── VSOP87 TRUNCATED (high accuracy for 1800–2100) ──────────
-// Sun (full precision)
-function calcSun(jday){
-  const t=T(jday);
-  const L0=norm(280.46646+36000.76983*t+0.0003032*t*t);
-  const M=norm(357.52911+35999.05029*t-0.0001537*t*t);
-  const Mr=d2r(M);
-  const C=(1.914602-0.004817*t-0.000014*t*t)*Math.sin(Mr)
-          +(0.019993-0.000101*t)*Math.sin(2*Mr)
-          +0.000289*Math.sin(3*Mr);
-  const omega=norm(125.04-1934.136*t);
-  const app=norm(L0+C-0.00569-0.00478*Math.sin(d2r(omega)));
-  return app;
-}
-
-// Moon (ELP2000 truncated, ~0.1° accuracy)
-function calcMoon(jday){
-  const t=T(jday);
-  const Lp=norm(218.3164477+481267.88123421*t-0.0015786*t*t+t*t*t/538841-t*t*t*t/65194000);
-  const D =norm(297.8501921+445267.1114034*t-0.0018819*t*t+t*t*t/545868-t*t*t*t/113065000);
-  const M =norm(357.5291092+35999.0502909*t-0.0001536*t*t+t*t*t/24490000);
-  const Mp=norm(134.9633964+477198.8675055*t+0.0087414*t*t+t*t*t/69699-t*t*t*t/14712000);
-  const F =norm(93.2720950+483202.0175233*t-0.0036539*t*t-t*t*t/3526000+t*t*t*t/863310000);
-  const Dr=d2r(D),Mr2=d2r(M),Mpr=d2r(Mp),Fr=d2r(F);
-  let lon=Lp;
-  lon+=6.288774*Math.sin(Mpr);
-  lon+=1.274027*Math.sin(2*Dr-Mpr);
-  lon+=0.658314*Math.sin(2*Dr);
-  lon+=0.213618*Math.sin(2*Mpr);
-  lon-=0.185116*Math.sin(Mr2);
-  lon-=0.114332*Math.sin(2*Fr);
-  lon+=0.058793*Math.sin(2*Dr-2*Mpr);
-  lon+=0.057066*Math.sin(2*Dr-Mr2-Mpr);
-  lon+=0.053322*Math.sin(2*Dr+Mpr);
-  lon+=0.045758*Math.sin(2*Dr-Mr2);
-  lon-=0.040923*Math.sin(Mr2-Mpr);
-  lon-=0.034720*Math.sin(Dr);
-  lon-=0.030383*Math.sin(Mr2+Mpr);
-  lon+=0.015327*Math.sin(2*Dr-2*Fr);
-  lon-=0.012528*Math.sin(Mpr+2*Fr);
-  lon+=0.010980*Math.sin(Mpr-2*Fr);
-  lon+=0.010675*Math.sin(4*Dr-Mpr);
-  lon+=0.010034*Math.sin(3*Mpr);
-  lon+=0.008548*Math.sin(4*Dr-2*Mpr);
-  lon-=0.007888*Math.sin(2*Dr+Mr2-Mpr);
-  lon-=0.006766*Math.sin(2*Dr+Mr2);
-  lon-=0.005163*Math.sin(Dr-Mpr);
-  lon+=0.004987*Math.sin(Dr+Mr2);
-  lon+=0.004036*Math.sin(2*Dr-Mr2+Mpr);
-  lon+=0.003994*Math.sin(2*Dr+2*Mpr);
-  lon+=0.003861*Math.sin(4*Dr);
-  lon+=0.003665*Math.sin(2*Dr-3*Mpr);
-  lon-=0.002689*Math.sin(Mr2-2*Mpr);
-  lon-=0.002602*Math.sin(2*Dr-Mpr+2*Fr);
-  lon+=0.002390*Math.sin(2*Dr-Mr2-2*Mpr);
-  lon-=0.002348*Math.sin(Dr+Mpr);
-  lon+=0.002236*Math.sin(2*Dr-2*Mr2);
-  lon-=0.002120*Math.sin(Mr2+2*Mpr);
-  lon-=0.002069*Math.sin(2*Mr2);
-  lon+=0.002048*Math.sin(2*Dr-2*Mr2-Mpr);
-  lon-=0.001773*Math.sin(2*Dr+Mpr-2*Fr);
-  lon-=0.001595*Math.sin(2*Dr+2*Fr);
-  lon+=0.001215*Math.sin(4*Dr-Mr2-Mpr);
-  lon-=0.001110*Math.sin(2*Mpr+2*Fr);
-  return norm(lon);
-}
-
-// Mercury (VSOP87 truncated)
-function calcMercury(jday){
-  const t=T(jday);
-  const L=norm(252.250906+149474.0722491*t+0.0003035*t*t+0.000000018*t*t*t);
-  const M=norm(L-77.45779628-norm(48.33076593*t+0.0*t*t));
-  const Mr=d2r(M);
-  let lon=L;
-  lon+=23.4400*Math.sin(Mr);
-  lon+=2.9818*Math.sin(2*Mr);
-  lon+=0.5255*Math.sin(3*Mr);
-  lon+=0.1058*Math.sin(4*Mr);
-  lon+=0.0219*Math.sin(5*Mr);
-  // Sun correction
-  const sunL=calcSun(jday);
-  const relToSun=norm(L-sunL);
-  if(relToSun>180){}  // just use direct
-  return norm(lon);
-}
-
-// Venus (VSOP87 truncated)
-function calcVenus(jday){
-  const t=T(jday);
-  const L=norm(181.979801+58519.2130302*t+0.00031014*t*t);
-  const M=norm(L-131.563703-norm(76.67992019*t));
-  const Mr=d2r(M);
-  let lon=L;
-  lon+=0.7758*Math.sin(Mr);
-  lon+=0.0033*Math.sin(2*Mr);
-  return norm(lon);
-}
-
-// Mars (VSOP87 truncated, decent accuracy)
-function calcMars(jday){
-  const t=T(jday);
-  const L=norm(355.433275+19141.6964746*t+0.00031097*t*t);
-  const M=norm(L-336.060234-norm(191.3985*t));
-  const Mr=d2r(M);
-  let lon=L;
-  lon+=10.6912*Math.sin(Mr);
-  lon+=0.6228*Math.sin(2*Mr);
-  lon+=0.0503*Math.sin(3*Mr);
-  lon+=0.0046*Math.sin(4*Mr);
-  return norm(lon);
-}
-
-// Jupiter (VSOP87 truncated)
-function calcJupiter(jday){
-  const t=T(jday);
-  const L=norm(34.351519+3036.3027748*t+0.0002233*t*t);
-  const M=norm(L-14.331-norm(100.4440*t));
-  const Mr=d2r(M);
-  let lon=L;
-  lon+=5.5549*Math.sin(Mr);
-  lon+=0.1683*Math.sin(2*Mr);
-  lon+=0.0071*Math.sin(3*Mr);
-  return norm(lon);
-}
-
-// Saturn (VSOP87 truncated)
-function calcSaturn(jday){
-  const t=T(jday);
-  const L=norm(50.077444+1223.5110686*t+0.00051908*t*t);
-  const M=norm(L-93.057-norm(113.6634*t));
-  const Mr=d2r(M);
-  const jupM=d2r(norm(34.351519+3036.3027748*t-14.331-100.4440*t));
-  let lon=L;
-  lon+=6.3585*Math.sin(Mr);
-  lon+=0.2204*Math.sin(2*Mr);
-  // Jupiter-Saturn interaction
-  lon+=0.6398*Math.sin(2*jupM-5*Mr+0.28);
-  lon-=0.5765*Math.sin(2*jupM-3*Mr+0.93);
-  return norm(lon);
-}
-
-// Uranus (simplified mean longitude + main equation)
-function calcUranus(jday){
-  const t=T(jday);
-  const L=norm(314.055005+429.8640561*t+0.00030390*t*t);
-  const M=norm(L-173.005159-norm(74.0059731*t));
-  const Mr=d2r(M);
-  let lon=L;
-  lon+=5.3192*Math.sin(Mr);
-  lon+=0.1557*Math.sin(2*Mr);
-  return norm(lon);
-}
-
-// Neptune (simplified)
-function calcNeptune(jday){
-  const t=T(jday);
-  const L=norm(304.348665+219.8833092*t+0.00030882*t*t);
-  const M=norm(L-48.123691-norm(48.0113132*t));
-  const Mr=d2r(M);
-  let lon=L;
-  lon+=1.0566*Math.sin(Mr);
-  lon+=0.0211*Math.sin(2*Mr);
-  return norm(lon);
-}
-
-// Pluto (highly approximate, OK for sign/degree within 1°)
-function calcPluto(jday){
-  const t=T(jday);
-  const s=norm(50.03+84.3*t);
-  const p=norm(238.95+144.96*t);
-  const Sr=d2r(s),Pr=d2r(p);
-  let lon=p;
-  lon-=9.47*Math.sin(Pr);
-  lon+=4.41*Math.sin(2*Pr);
-  lon+=2.83*Math.sin(3*Sr-9*Pr+49.49);
-  lon-=2.80*Math.sin(Sr-5*Pr);
-  lon-=1.43*Math.sin(2*Sr-10*Pr+2.96);
-  lon+=1.21*Math.sin(Sr-3*Pr);
-  lon+=0.97*Math.sin(4*Sr-18*Pr);
-  lon+=0.68*Math.sin(Sr-2*Pr);
-  lon+=0.62*Math.sin(2*Pr-3*Sr);
-  return norm(lon);
-}
-
-function calcAllPlanets(date){
-  const j=jd(date);
-  return {
-    sun:     calcSun(j),
-    moon:    calcMoon(j),
-    mercury: calcMercury(j),
-    venus:   calcVenus(j),
-    mars:    calcMars(j),
-    jupiter: calcJupiter(j),
-    saturn:  calcSaturn(j),
-    uranus:  calcUranus(j),
-    neptune: calcNeptune(j),
-    pluto:   calcPluto(j)
-  };
-}
-
-// ─── ASC (accurate) ──────────────────────────────────────────
-function calcASC(date,lat,lon){
-  const j=jd(date);
-  const t=T(j);
-  let GMST=280.46061837+360.98564736629*(j-2451545)+0.000387933*t*t-(t*t*t)/38710000;
-  GMST=norm(GMST);
-  const LST=norm(GMST+lon);
-  const eps=d2r(23.439291-0.013004*t);
-  const phi=d2r(lat);
-  const theta=d2r(LST);
-  const asc=Math.atan2(-Math.cos(theta), Math.sin(theta)*Math.cos(eps)+Math.tan(phi)*Math.sin(eps));
-  return norm(r2d(asc));
-}
-
-// ─── PLACIDUS HOUSES (simplified, good for ±60° lat) ────────
-function calcPlacidus(date,lat,lon){
-  const j=jd(date);
-  const t=T(j);
-  let GMST=280.46061837+360.98564736629*(j-2451545)+0.000387933*t*t-(t*t*t)/38710000;
-  const LST=norm(GMST+lon);
-  const eps=d2r(23.439291-0.013004*t);
-  const phi=d2r(lat);
-  const theta=d2r(LST);
-
-  // MC (Midheaven)
-  const MC=norm(r2d(Math.atan2(Math.sin(theta),Math.cos(theta)*Math.cos(eps)-Math.tan(0)*Math.sin(eps))));
-  // ASC
-  const ascRad=Math.atan2(-Math.cos(theta), Math.sin(theta)*Math.cos(eps)+Math.tan(phi)*Math.sin(eps));
-  const ASC=norm(r2d(ascRad));
-
-  // For equal houses (Placidus is complex; using equal from ASC + MC for angles)
-  const houses=[];
-  for(let i=0;i<12;i++) houses.push(norm(ASC+i*30));
-  houses[9]=norm(MC);  // Override H10 with actual MC
-  houses[3]=norm(MC+180); // H4 = IC
-
-  return {asc:ASC,mc:MC,houses};
-}
-
-// ─── ASPECTS ─────────────────────────────────────────────────
-const ASPECT_DEFS=[
-  {name:'Соединение', sym:'☌', angle:0,   orb:8, cls:'aspect-conj',  power:5},
-  {name:'Оппозиция',  sym:'☍', angle:180, orb:8, cls:'aspect-opp',   power:4},
-  {name:'Квадратура', sym:'□', angle:90,  orb:7, cls:'aspect-sq',    power:4},
-  {name:'Тригон',     sym:'△', angle:120, orb:8, cls:'aspect-trine', power:3},
-  {name:'Секстиль',   sym:'⚹', angle:60,  orb:6, cls:'aspect-sext',  power:2},
-];
-
-function angularDiff(a,b){
-  const d=Math.abs(norm(a)-norm(b));
-  return d>180?360-d:d;
-}
-
-function findAspects(natal,transit){
-  const aspects=[];
-  const natalKeys=Object.keys(natal);
-  const transitKeys=Object.keys(transit);
-
-  transitKeys.forEach(tp=>{
-    natalKeys.forEach(np=>{
-      ASPECT_DEFS.forEach(asp=>{
-        const diff=angularDiff(transit[tp],natal[np]);
-        const orb=Math.abs(diff-asp.angle);
-        if(orb<=asp.orb){
-          aspects.push({
-            transitPlanet:tp, natalPlanet:np,
-            aspect:asp, orb:orb.toFixed(1)
-          });
-        }
+    periodButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        periodButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        selectedPeriod = button.dataset.period;
       });
     });
-  });
 
-  // Sort by power desc, then orb asc
-  aspects.sort((a,b)=>b.aspect.power-a.aspect.power||parseFloat(a.orb)-parseFloat(b.orb));
-  return aspects.slice(0,10);
-}
-
-// ─── GEOCODING + TIMEZONE ────────────────────────────────────
-async function getCoords(city){
-  const url=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ru&q=${encodeURIComponent(city)}`;
-  const res=await fetch(url,{headers:{'Accept':'application/json','User-Agent':'AstroApp/1.0'}});
-  const data=await res.json();
-  if(!data||!data.length) return null;
-  const lat=parseFloat(data[0].lat);
-  const lon=parseFloat(data[0].lon);
-  const name=data[0].display_name||city;
-  let utcOffset=Math.round(lon/15);
-  try{
-    const tzRes=await fetch(`https://timeapi.io/api/timezone/coordinate?latitude=${lat}&longitude=${lon}`);
-    const tzData=await tzRes.json();
-    if(tzData&&tzData.currentUtcOffset){
-      utcOffset=tzData.currentUtcOffset.seconds/3600;
+    function getPrediction(period, aspect) {
+      return predictions[period]?.[aspect]
+        || 'Линии ладони показывают скрытый импульс перемен. В выбранной сфере скоро проявится знак, который поможет вам увидеть верное направление.\n\nДоверьтесь внутреннему чувству меры и не торопите события.';
     }
-  }catch(e){
-    console.warn('TZ API недоступен, UTC offset по долготе:',utcOffset);
-  }
-  return{lat,lon,name,utcOffset};
-}
 
-// ─── PERIOD DATE ─────────────────────────────────────────────
-function transitDate(period){
-  const d=new Date();
-  if(period==='tomorrow') d.setDate(d.getDate()+1);
-  else if(period==='week') d.setDate(d.getDate()+4);
-  else if(period==='month') d.setDate(d.getDate()+15);
-  return d;
-}
-
-function periodLabel(p){
-  if(p==='today') return 'сегодня';
-  if(p==='tomorrow') return 'завтра';
-  if(p==='week') return 'в ближайшую неделю';
-  return 'в этот период';
-}
-
-// ─── ENERGY DAYS ────────────────────────────────────────────
-function energyDays(natal,transit){
-  const base=50;
-  let score=base;
-  const aspects=findAspects(natal,transit);
-
-  aspects.forEach(a=>{
-    const ang=a.aspect.angle;
-    if(ang===0||ang===120||ang===60) score+=a.aspect.power*2;
-    else score-=a.aspect.power;
-  });
-
-  const days=[];
-  const variation=[-4,+7,-2,+10,+3,+12,+5];
-  const dn=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-  variation.forEach((v,i)=>{
-    const e=Math.min(Math.max(score+v,30),95);
-    days.push({name:dn[i],energy:Math.round(e)});
-  });
-  return days;
-}
-
-// ─── BUILD HTML HELPERS ──────────────────────────────────────
-function buildPlanetsHTML(planets,asc){
-  let html='';
-  Object.keys(PLANET_INFO).forEach(k=>{
-    if(k==='asc') return;
-    const p=PLANET_INFO[k];
-    const s=signOf(planets[k]);
-    html+=`<div class="planet-item">
-      <div class="planet-emoji">${p.emoji}</div>
-      <div class="planet-name">${p.name}</div>
-      <div class="planet-sign">${s.sym} ${s.name}</div>
-      <div class="planet-deg">${s.deg.toFixed(1)}°</div>
-    </div>`;
-  });
-  const ascSign=signOf(asc);
-  html+=`<div class="planet-item">
-    <div class="planet-emoji">⬆</div>
-    <div class="planet-name">Асцендент</div>
-    <div class="planet-sign">${ascSign.sym} ${ascSign.name}</div>
-    <div class="planet-deg">${ascSign.deg.toFixed(1)}°</div>
-  </div>`;
-  return html;
-}
-
-function buildAspectsHTML(aspects){
-  if(!aspects.length) return '<div style="color:#666;font-size:0.8rem;padding:8px">Сильных транзитных аспектов не найдено</div>';
-  return aspects.map(a=>`
-    <div class="aspect-item ${a.aspect.cls}">
-      <span class="aspect-symbol">${a.aspect.sym}</span>
-      <span class="aspect-text">Транзит ${PLANET_INFO[a.transitPlanet]?.name||a.transitPlanet} ${a.aspect.name.toLowerCase()} натального ${PLANET_INFO[a.natalPlanet]?.name||a.natalPlanet}</span>
-      <span class="aspect-orb">орбис ${a.orb}°</span>
-    </div>`).join('');
-}
-
-function buildHousesHTML(houses){
-  return houses.map((h,i)=>{
-    const s=signOf(h);
-    return `<div class="house-item">${i+1} дом: <span>${s.sym} ${s.name}</span></div>`;
-  }).join('');
-}
-
-function buildDaysHTML(days){
-  return days.map(d=>{
-    const cls=d.energy>=65?'good':d.energy>=50?'neutral':'bad';
-    return `<div class="day-cell ${cls}"><div class="dn">${d.name}</div><div class="de">${d.energy}%</div></div>`;
-  }).join('');
-}
-
-// ─── CLAUDE API ──────────────────────────────────────────────
-async function streamClaude(prompt, targetEl, title, stars){
-  const block=document.createElement('div');
-  block.className='ai-block';
-
-  const starsStr=stars?`<div class="ai-stars">${'<span class="ai-star">★</span>'.repeat(stars)}${'<span class="ai-star dim">★</span>'.repeat(5-stars)}</div>`:'';
-
-  block.innerHTML=`
-    <div class="ai-block-title">${title}</div>
-    <div class="ai-block-text streaming"></div>
-    ${starsStr}
-  `;
-  targetEl.appendChild(block);
-  const textEl=block.querySelector('.ai-block-text');
-
-  try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        stream:true,
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-
-    const reader=resp.body.getReader();
-    const decoder=new TextDecoder();
-    let text='';
-
-    while(true){
-      const{done,value}=await reader.read();
-      if(done) break;
-      const chunk=decoder.decode(value);
-      const lines=chunk.split('\n');
-      for(const line of lines){
-        if(line.startsWith('data: ')){
-          const data=line.slice(6);
-          if(data==='[DONE]') break;
-          try{
-            const ev=JSON.parse(data);
-            if(ev.type==='content_block_delta'&&ev.delta?.text){
-              text+=ev.delta.text;
-              textEl.textContent=text;
-            }
-          }catch{}
-        }
-      }
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
     }
-    textEl.classList.remove('streaming');
-  }catch(e){
-    textEl.classList.remove('streaming');
-    textEl.textContent='Не удалось загрузить интерпретацию. Проверьте подключение.';
-    console.error(e);
-  }
-}
 
-function buildPrompt(mode,name,natal,transit,aspects,ascSign,mcSign,period,section){
-  const pLabel=periodLabel(period);
-  const natalDesc=Object.keys(PLANET_INFO).filter(k=>k!=='asc').map(k=>{
-    const s=signOf(natal[k]);
-    return `${PLANET_INFO[k].name}: ${s.sym} ${s.name} ${s.deg.toFixed(1)}°`;
-  }).join(', ');
-
-  const transitDesc=Object.keys(PLANET_INFO).filter(k=>k!=='asc').map(k=>{
-    const s=signOf(transit[k]);
-    return `${PLANET_INFO[k].name}: ${s.sym} ${s.name}`;
-  }).join(', ');
-
-  const aspectDesc=aspects.slice(0,5).map(a=>
-    `${a.aspect.sym} Транзит ${PLANET_INFO[a.transitPlanet]?.name} ${a.aspect.name} натального ${PLANET_INFO[a.natalPlanet]?.name} (орбис ${a.orb}°)`
-  ).join('; ');
-
-  const nameStr=name?` для ${name}`:'';
-
-  if(mode==='p'){
-    return `Ты профессиональный астролог. Составь персональный астрологический прогноз${nameStr} на ${pLabel} (русский язык, 4–5 предложений, без вступлений и заключений, сразу по делу).
-
-НАТАЛЬНАЯ КАРТА: ${natalDesc}
-АСЦ: ${ascSign.sym} ${ascSign.name}, МС: ${mcSign.sym} ${mcSign.name}
-
-ТЕКУЩИЕ ТРАНЗИТЫ: ${transitDesc}
-
-КЛЮЧЕВЫЕ АСПЕКТЫ: ${aspectDesc}
-
-Раздел "${section}". Сделай интерпретацию конкретной, точной и практичной — без общих слов. Учитывай реальные аспекты и знаки. Не начинай с "Для вас", "В этот период" — сразу суть.`;
-  } else {
-    return `Ты профессиональный бизнес-астролог. Составь деловой прогноз${nameStr} на ${pLabel} (русский язык, 4–5 предложений, конкретно и практично).
-
-НАТАЛЬНАЯ КАРТА: ${natalDesc}
-АСЦ: ${ascSign.sym} ${ascSign.name}, МС: ${mcSign.sym} ${mcSign.name}
-
-ТЕКУЩИЕ ТРАНЗИТЫ: ${transitDesc}
-
-КЛЮЧЕВЫЕ АСПЕКТЫ: ${aspectDesc}
-
-Раздел "${section}". Конкретные рекомендации для бизнеса, переговоров, финансов — опираясь на реальные планетарные позиции и аспекты.`;
-  }
-}
-
-// ─── MAIN CALCULATE ──────────────────────────────────────────
-async function calculateAstro(mode){
-  const day=parseInt(document.getElementById(mode+'Day').value);
-  const month=parseInt(document.getElementById(mode+'Month').value);
-  const year=parseInt(document.getElementById(mode+'Year').value);
-  const hour=parseInt(document.getElementById(mode+'Hour').value);
-  const min=parseInt(document.getElementById(mode+'Min').value);
-  const place=document.getElementById(mode+'Place').value.trim();
-  const name=document.getElementById(mode+'Name').value.trim();
-
-  const calcBtn=document.getElementById(mode+'CalcBtn');
-
-  function resetBtn(){
-    calcBtn.disabled=false;
-    calcBtn.innerHTML='✨ Рассчитать';
-    document.getElementById(mode+'Loader').classList.remove('active');
-  }
-
-  if(!place){showError(mode,'Введите город рождения');return;}
-
-  calcBtn.disabled=true;
-  calcBtn.innerHTML='⏳ Расчёт...';
-
-  showError(mode,'');
-  document.getElementById(mode+'Res').classList.remove('active');
-  document.getElementById(mode+'Horo').classList.remove('active');
-  document.getElementById(mode+'Loader').classList.add('active');
-  document.getElementById(mode+'Cards').innerHTML='';
-
-  try{
-    const coords=await getCoords(place);
-    if(!coords){showError(mode,'Город не найден. Попробуйте написать по-английски.');resetBtn();return;}
-
-    // Convert local birth time to UTC using city timezone
-    // natalDate must be in UTC for correct ASC/planet calculations
-    const utcOffset=coords.utcOffset||0;
-    const localMs=Date.UTC(year,month-1,day,hour,min,0);
-    const natalDate=new Date(localMs - utcOffset*3600000);
-    const natal=calcAllPlanets(natalDate);
-    const {asc,mc,houses}=calcPlacidus(natalDate,coords.lat,coords.lon);
-
-    const period=document.querySelector(`#${mode}Form .period-btn.active`)?.dataset.p||'today';
-    const tDate=transitDate(period);
-    const transit=calcAllPlanets(tDate);
-    const aspects=findAspects(natal,transit);
-
-    const ascSign=signOf(asc);
-    const mcSign=signOf(mc);
-
-    // Render chart
-    document.getElementById(mode+'Planets').innerHTML=buildPlanetsHTML(natal,asc);
-    document.getElementById(mode+'Meta').innerHTML=`
-      <p>${name?'<b>'+name+'</b><br>':''}Дата: ${day} ${MONTHS_GEN[month-1]} ${year}, ${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}</p>
-      <p>Место: ${coords.name.split(',')[0]}</p>
-      <p>Координаты: ${coords.lat.toFixed(3)}° с.ш., ${coords.lon.toFixed(3)}° в.д. | UTC${utcOffset>=0?'+':''}${utcOffset}</p>
-      <p>АСЦ: ${ascSign.sym} ${ascSign.name} ${ascSign.deg.toFixed(1)}° | МС: ${mcSign.sym} ${mcSign.name} ${mcSign.deg.toFixed(1)}°</p>
-      <p class="note">Расчёт: VSOP87 (10 планет) + ELP2000 (Луна), дома — Плацидус</p>
-    `;
-    document.getElementById(mode+'Aspects').innerHTML=buildAspectsHTML(aspects);
-    document.getElementById(mode+'Houses').innerHTML=buildHousesHTML(houses);
-    document.getElementById(mode+'Res').classList.add('active');
-
-    // Days
-    const days=energyDays(natal,transit);
-    document.getElementById(mode+'Days').innerHTML=buildDaysHTML(days);
-
-    document.getElementById(mode+'Loader').classList.remove('active');
-    document.getElementById(mode+'Horo').classList.add('active');
-
-    const cards=document.getElementById(mode+'Cards');
-
-    // Stream AI interpretations
-    if(mode==='p'){
-      const sections=[
-        {title:'😊 Настроение и самочувствие',stars:4},
-        {title:'💑 Отношения и любовь',stars:4},
-        {title:'💰 Финансы',stars:3},
-        {title:'⚡ Энергия и действие',stars:4},
-        {title:'🎯 Ключевой совет',stars:5},
-      ];
-      for(const s of sections){
-        await streamClaude(
-          buildPrompt(mode,name,natal,transit,aspects,ascSign,mcSign,period,s.title),
-          cards,s.title,s.stars
-        );
+    async function startPalmReading() {
+      if (!imageLoaded) {
+        alert('Сначала загрузите фото ладони.');
+        return;
       }
-    } else {
-      const sections=[
-        {title:'🤝 Переговоры и коммуникации'},
-        {title:'💼 Рабочий темп и продуктивность'},
-        {title:'💰 Финансы и инвестиции'},
-        {title:'📊 Стратегия и планирование'},
-        {title:'⭐ Главный совет на период'},
-      ];
-      for(const s of sections){
-        await streamClaude(
-          buildPrompt(mode,name,natal,transit,aspects,ascSign,mcSign,period,s.title),
-          cards,s.title,null
-        );
+
+      const selectedAspect = aspectSelect.value;
+
+      analyzeBtn.disabled = true;
+      analyzeBtn.textContent = 'Идёт сканирование...';
+      scanStage.classList.add('is-scanning');
+      scanStatus.classList.add('active');
+      resultWrap.classList.remove('visible');
+
+      try {
+        await wait(2800);
+
+        metaPeriod.textContent = selectedPeriod;
+        metaAspect.textContent = selectedAspect;
+        resultTitle.textContent = `${selectedAspect} — предсказание на ${selectedPeriod.toLowerCase()}`;
+        resultText.textContent = getPrediction(selectedPeriod, selectedAspect);
+
+        resultWrap.classList.add('visible');
+        resultWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } finally {
+        scanStage.classList.remove('is-scanning');
+        scanStatus.classList.remove('active');
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = 'Получить предсказание';
       }
     }
 
-  }catch(e){
-    console.error(e);
-    showError(mode,'Ошибка: '+e.message);
-  }finally{
-    calcBtn.disabled=false;
-    calcBtn.innerHTML='✨ Рассчитать';
-    document.getElementById(mode+'Loader').classList.remove('active');
-  }
-}
-
-function showError(mode,msg){
-  const el=document.getElementById(mode+'Error');
-  if(msg){el.textContent=msg;el.style.display='block';}
-  else el.style.display='none';
-}
-
-// ─── NAVIGATION ──────────────────────────────────────────────
-function startMode(m){
-  document.getElementById('modeSelect').classList.remove('active');
-  document.getElementById(m==='p'?'personal':'business').classList.add('active');
-}
-function backMode(){
-  document.getElementById('personal').classList.remove('active');
-  document.getElementById('business').classList.remove('active');
-  document.getElementById('modeSelect').classList.add('active');
-}
-
-function calcMode(e,m){e.preventDefault();calculateAstro(m);}
-
-function clearMode(m){
-  document.getElementById(m+'Day').selectedIndex=0;
-  document.getElementById(m+'Month').selectedIndex=0;
-  document.getElementById(m+'Year').selectedIndex=0;
-  document.getElementById(m+'Hour').value=12;
-  document.getElementById(m+'Min').selectedIndex=0;
-  document.getElementById(m+'Place').value='';
-  document.getElementById(m+'Name').value='';
-  document.getElementById(m+'Res').classList.remove('active');
-  document.getElementById(m+'Horo').classList.remove('active');
-  document.getElementById(m+'Cards').innerHTML='';
-  document.getElementById(m+'Planets').innerHTML='';
-  document.getElementById(m+'Aspects').innerHTML='';
-  document.getElementById(m+'Houses').innerHTML='';
-  document.getElementById(m+'Days').innerHTML='';
-  showError(m,'');
-  const btns=document.querySelectorAll(`#${m}Form .period-btn`);
-  btns.forEach((b,i)=>b.classList.toggle('active',i===0));
-}
-
-// Period buttons
-['p','b'].forEach(m=>{
-  document.querySelectorAll(`#${m}Form .period-btn`).forEach(btn=>{
-    btn.addEventListener('click',async e=>{
-      e.preventDefault();
-      const form=e.target.closest('form');
-      form.querySelectorAll('.period-btn').forEach(x=>x.classList.remove('active'));
-      e.target.classList.add('active');
-      if(document.getElementById(m+'Res').classList.contains('active')){
-        await calculateAstro(m);
-      }
-    });
-  });
-});
-
-// ─── INIT ────────────────────────────────────────────────────
-initSelects();
-</script>
-
+    analyzeBtn.addEventListener('click', startPalmReading);
+  </script>
 </body>
 </html>
