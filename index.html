@@ -1,1086 +1,180 @@
-
 <!DOCTYPE html>
-
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASTRO | Премиум гороскоп</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTRO</title>
 
-```
-    body {
-        background: linear-gradient(135deg, #0a0f23 0%, #1a1f3a 25%, #2d1b4e 50%, #1a1f3a 75%, #0a0f23 100%);
-        background-attachment: fixed;
-        color: #fff;
-        font-family: 'Montserrat', sans-serif;
-        font-size: 16px;
-        overflow-x: hidden;
-        position: relative;
-    }
-    
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(circle at 20% 50%, rgba(184, 149, 106, 0.15) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.08) 0%, transparent 50%);
-        pointer-events: none;
-        z-index: 0;
-    }
-    
-    body::after {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="stars" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="30" cy="40" r="0.5" fill="rgba(255,255,255,0.08)"/><circle cx="60" cy="20" r="1.5" fill="rgba(255,255,255,0.12)"/><circle cx="80" cy="70" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)"/></svg>');
-        pointer-events: none;
-        z-index: 0;
-    }
-    
-    .wrapper {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-    
-    header {
-        padding: 40px 20px;
-        text-align: center;
-        border-bottom: 2px solid rgba(184, 149, 106, 0.3);
-        background: linear-gradient(180deg, rgba(10, 15, 35, 0.8) 0%, rgba(10, 15, 35, 0.4) 100%);
-        backdrop-filter: blur(10px);
-    }
-    
-    .logo {
-        font-family: 'Playfair Display', serif;
-        font-size: 3.5rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #d4c5a0 0%, #ffd700 50%, #b8956a 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 12px;
-        letter-spacing: 2px;
-        text-shadow: 0 0 30px rgba(212, 197, 160, 0.3);
-        animation: float 3s ease-in-out infinite;
-    }
-    
-    @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-    }
-    
-    .tagline {
-        color: #b8956a;
-        font-size: 0.9rem;
-        letter-spacing: 3px;
-        text-transform: uppercase;
-        font-weight: 300;
-    }
-    
-    .mode-selector {
-        display: none;
-        padding: 60px 20px;
-        text-align: center;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .mode-selector.active {
-        display: flex;
-    }
-    
-    .mode-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 2.5rem;
-        color: #d4c5a0;
-        margin-bottom: 50px;
-        font-weight: 600;
-    }
-    
-    .mode-buttons {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 30px;
-        max-width: 600px;
-        margin: 0 auto;
-    }
-    
-    .mode-btn {
-        padding: 40px 20px;
-        background: linear-gradient(135deg, rgba(184, 149, 106, 0.1) 0%, rgba(212, 197, 160, 0.05) 100%);
-        border: 2px solid rgba(184, 149, 106, 0.5);
-        color: #d4c5a0;
-        font-family: 'Playfair Display', serif;
-        font-size: 1.5rem;
-        font-weight: 600;
-        cursor: pointer;
-        text-transform: uppercase;
-        transition: all 0.4s;
-        backdrop-filter: blur(10px);
-        border-radius: 8px;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .mode-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s;
-    }
-    
-    .mode-btn:hover {
-        background: linear-gradient(135deg, rgba(184, 149, 106, 0.25) 0%, rgba(212, 197, 160, 0.15) 100%);
-        border-color: #d4c5a0;
-        transform: translateY(-5px);
-        box-shadow: 0 10px 40px rgba(212, 197, 160, 0.2);
-    }
-    
-    .mode-btn:hover::before {
-        left: 100%;
-    }
-    
-    .content {
-        display: none;
-        flex: 1;
-        padding: 30px 15px;
-        overflow-y: auto;
-    }
-    
-    .content.active {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .mode-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid rgba(184, 149, 106, 0.3);
-    }
-    
-    .mode-label {
-        font-family: 'Playfair Display', serif;
-        font-size: 2rem;
-        color: #d4c5a0;
-        font-weight: 600;
-    }
-    
-    .btn-back {
-        background: linear-gradient(135deg, rgba(184, 149, 106, 0.15) 0%, rgba(212, 197, 160, 0.05) 100%);
-        color: #d4c5a0;
-        border: 1.5px solid rgba(184, 149, 106, 0.5);
-        padding: 10px 16px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        cursor: pointer;
-        text-transform: uppercase;
-        border-radius: 6px;
-        transition: all 0.3s;
-        backdrop-filter: blur(5px);
-    }
-    
-    .btn-back:hover {
-        background: linear-gradient(135deg, rgba(184, 149, 106, 0.25) 0%, rgba(212, 197, 160, 0.15) 100%);
-        border-color: #d4c5a0;
-        transform: translateY(-2px);
-    }
-    
-    .form-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 25px;
-        margin-bottom: 20px;
-    }
-    
-    @media (min-width: 769px) {
-        .form-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-        }
-    }
-    
-    .form-section {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .section-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.3rem;
-        color: #d4c5a0;
-        margin-bottom: 5px;
-        font-weight: 600;
-    }
-    
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-    
-    label {
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        color: #b8956a;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-    }
-    
-    input {
-        width: 100%;
-        padding: 12px 16px;
-        background: linear-gradient(135deg, rgba(184, 149, 106, 0.08) 0%, rgba(212, 197, 160, 0.03) 100%);
-        border: 1.5px solid rgba(184, 149, 106, 0.4);
-        color: #fff;
-        font-family: 'Montserrat', sans-serif;
-        font-size: 0.95rem;
-        outline: none;
-        cursor: pointer;
-        border-radius: 6px;
-        transition: all 0.3s;
-        backdrop-filter: blur(5px);
-    }
-    
-    input:focus {
-        background: linear-gradient(135deg, rgba(184, 149, 106, 0.15) 0%, rgba(212, 197, 160, 0.08) 100%);
-        border-color: #d4c5a0;
-        box-shadow: 0 0 20px rgba(212, 197, 160, 0.15);
-    }
-    
-    .periods {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-        gap: 8px;
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px solid rgba(184, 149, 106, 0.2);
-    }
-    
-    .period-btn {
-        padding: 8px 8px;
-        background: transparent;
-        border: 1.5px solid rgba(184, 149, 106, 0.4);
-        color: #b8956a;
-        font-size: 0.75rem;
-        font-weight: 600;
-        cursor: pointer;
-        text-transform: uppercase;
-        border-radius: 4px;
-        transition: all 0.3s;
-    }
-    
-    .period-btn:hover {
-        border-color: #d4c5a0;
-        color: #d4c5a0;
-    }
-    
-    .period-btn.active {
-        background: linear-gradient(135deg, #b8956a 0%, #d4c5a0 100%);
-        color: #0a0f23;
-        border-color: #d4c5a0;
-    }
-    
-    .buttons {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 15px;
-    }
-    
-    .btn {
-        padding: 11px 14px;
-        border: none;
-        font-family: 'Montserrat', sans-serif;
-        font-size: 0.85rem;
-        font-weight: 600;
-        cursor: pointer;
-        text-transform: uppercase;
-        border-radius: 6px;
-        transition: all 0.3s;
-        letter-spacing: 0.5px;
-    }
-    
-    .btn-calc {
-        background: linear-gradient(135deg, #b8956a 0%, #d4c5a0 100%);
-        color: #0a0f23;
-        border: none;
-        box-shadow: 0 5px 20px rgba(184, 149, 106, 0.3);
-    }
-    
-    .btn-calc:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(212, 197, 160, 0.4);
-    }
-    
-    .btn-clear {
-        background: transparent;
-        color: #b8956a;
-        border: 1.5px solid rgba(184, 149, 106, 0.5);
-    }
-    
-    .btn-clear:hover {
-        background: rgba(184, 149, 106, 0.1);
-        border-color: #d4c5a0;
-        color: #d4c5a0;
-    }
-    
-    .chart {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        margin-bottom: 20px;
-    }
-    
-    .chart-item {
-        background: linear-gradient(135deg, rgba(184, 149, 106, 0.12) 0%, rgba(212, 197, 160, 0.05) 100%);
-        border: 1.5px solid rgba(184, 149, 106, 0.3);
-        padding: 18px 12px;
-        text-align: center;
-        border-radius: 8px;
-        backdrop-filter: blur(5px);
-        transition: all 0.3s;
-    }
-    
-    .chart-item:hover {
-        border-color: #d4c5a0;
-        background: linear-gradient(135deg, rgba(184, 149, 106, 0.2) 0%, rgba(212, 197, 160, 0.1) 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(212, 197, 160, 0.15);
-    }
-    
-    .chart-label {
-        font-size: 0.7rem;
-        color: #8a8a8a;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .chart-value {
-        font-family: 'Playfair Display', serif;
-        font-size: 1rem;
-        color: #d4c5a0;
-        font-weight: 600;
-    }
-    
-    .results {
-        display: none;
-    }
-    
-    .results.active {
-        display: block;
-        animation: slideIn 0.5s ease-out;
-    }
-    
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .cards {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 15px;
-        margin-top: 20px;
-    }
-    
-    .card {
-        background: linear-gradient(135deg, rgba(184, 149, 106, 0.1) 0%, rgba(212, 197, 160, 0.04) 100%);
-        border: 1.5px solid rgba(184, 149, 106, 0.3);
-        padding: 20px;
-        border-radius: 8px;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s;
-    }
-    
-    .card:hover {
-        border-color: #d4c5a0;
-        background: linear-gradient(135deg, rgba(184, 149, 106, 0.15) 0%, rgba(212, 197, 160, 0.08) 100%);
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(212, 197, 160, 0.15);
-    }
-    
-    .card-title {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.1rem;
-        color: #d4c5a0;
-        margin-bottom: 10px;
-        font-weight: 600;
-    }
-    
-    .card-text {
-        font-size: 0.95rem;
-        color: #e8e8e8;
-        line-height: 1.7;
-        margin-bottom: 12px;
-    }
-    
-    .stars {
-        display: flex;
-        gap: 6px;
-        margin: 10px 0;
-    }
-    
-    .star {
-        font-size: 1.3rem;
-        color: #ffd700;
-        filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
-    }
-    
-    .star.empty {
-        color: rgba(255, 255, 255, 0.15);
-        filter: none;
-    }
-    
-    .days {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 8px;
-        margin: 20px 0;
-    }
-    
-    .day {
-        background: linear-gradient(135deg, rgba(184, 149, 106, 0.08) 0%, rgba(212, 197, 160, 0.02) 100%);
-        padding: 12px 8px;
-        text-align: center;
-        font-size: 0.8rem;
-        border: 1.5px solid rgba(184, 149, 106, 0.25);
-        border-radius: 6px;
-        backdrop-filter: blur(5px);
-        transition: all 0.3s;
-    }
-    
-    .day.good {
-        border-color: #4caf50;
-        background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.05) 100%);
-    }
-    
-    .day.bad {
-        border-color: #f44336;
-        background: linear-gradient(135deg, rgba(244, 67, 54, 0.15) 0%, rgba(244, 67, 54, 0.05) 100%);
-    }
-    
-    .day:hover {
-        transform: translateY(-3px);
-    }
-    
-    @media (max-width: 480px) {
-        .logo { font-size: 2.5rem; }
-        header { padding: 30px 15px; }
-        .content { padding: 20px 10px; }
-        .mode-buttons { grid-template-columns: 1fr; gap: 20px; }
-    }
+<style>
+body{
+background:#0a0f23;
+color:#fff;
+font-family:Arial;
+padding:20px;
+}
+button{padding:10px;margin-top:10px}
+input{padding:10px;margin:5px 0;width:100%}
 </style>
-```
 
 </head>
+
 <body>
-    <div class="wrapper">
-        <header>
-            <div class="logo">✦ ASTRO ✦</div>
-            <p class="tagline">Премиум астрологический гороскоп</p>
-        </header>
 
-```
-    <div id="modeSelect" class="mode-selector active">
-        <div class="mode-title">Выберите вашу путь</div>
-        <div class="mode-buttons">
-            <button class="mode-btn" onclick="startMode('p')">💫<br>Личный гороскоп</button>
-            <button class="mode-btn" onclick="startMode('b')">📈<br>Бизнес анализ</button>
-        </div>
-    </div>
+<h2>ASTRO</h2>
 
-    <div id="personal" class="content">
-        <div class="mode-header">
-            <div class="mode-label">💫 Личный гороскоп</div>
-            <button class="btn-back" onclick="backMode()">← Выбор</button>
-        </div>
-        <div class="form-grid">
-            <form id="pForm" class="form-section" onsubmit="calcPersonal(event)">
-                <div class="section-title">Ваши данные</div>
-                <div class="form-group"><label>Дата рождения *</label><input type="date" id="pDate" required></div>
-                <div class="form-group"><label>Время рождения</label><input type="time" id="pTime" value="12:00"></div>
-                <div class="form-group"><label>Место рождения</label><input type="text" id="pPlace" placeholder="Город"></div>
-                <div class="form-group"><label>Имя</label><input type="text" id="pName" placeholder="Ваше имя"></div>
-                <div class="periods">
-                    <button type="button" class="period-btn active" data-p="today">Сегодня</button>
-                    <button type="button" class="period-btn" data-p="tomorrow">Завтра</button>
-                    <button type="button" class="period-btn" data-p="week">Неделя</button>
-                    <button type="button" class="period-btn" data-p="month">Месяц</button>
-                </div>
-                <div class="buttons">
-                    <button type="submit" class="btn btn-calc">✨ Рассчитать</button>
-                    <button type="button" class="btn btn-clear" onclick="clearP()">Очистить</button>
-                </div>
-            </form>
-            <div class="results" id="pRes">
-                <div class="section-title">Натальная карта</div>
-                <div class="chart" id="pChart"></div>
-            </div>
-        </div>
-        <div id="pHoro" style="display:none;">
-            <div class="section-title" style="margin-top: 25px;">Ваш гороскоп</div>
-            <div class="cards" id="pCards"></div>
-            <div style="margin-top: 25px;">
-                <div class="section-title">Энергия по дням</div>
-                <div class="days" id="pDays"></div>
-            </div>
-        </div>
-    </div>
+<input type="date" id="pDate">
+<input type="time" id="pTime" value="12:00">
+<input type="text" id="pPlace" placeholder="Город">
 
-    <div id="business" class="content">
-        <div class="mode-header">
-            <div class="mode-label">📈 Бизнес анализ</div>
-            <button class="btn-back" onclick="backMode()">← Выбор</button>
-        </div>
-        <div class="form-grid">
-            <form id="bForm" class="form-section" onsubmit="calcBusiness(event)">
-                <div class="section-title">Ваши данные</div>
-                <div class="form-group"><label>Дата рождения *</label><input type="date" id="bDate" required></div>
-                <div class="form-group"><label>Время рождения</label><input type="time" id="bTime" value="12:00"></div>
-                <div class="form-group"><label>Место рождения</label><input type="text" id="bPlace" placeholder="Город"></div>
-                <div class="form-group"><label>Имя</label><input type="text" id="bName" placeholder="Ваше имя"></div>
-                <div class="periods">
-                    <button type="button" class="period-btn active" data-p="today">Сегодня</button>
-                    <button type="button" class="period-btn" data-p="tomorrow">Завтра</button>
-                    <button type="button" class="period-btn" data-p="week">Неделя</button>
-                    <button type="button" class="period-btn" data-p="month">Месяц</button>
-                </div>
-                <div class="buttons">
-                    <button type="submit" class="btn btn-calc">✨ Рассчитать</button>
-                    <button type="button" class="btn btn-clear" onclick="clearB()">Очистить</button>
-                </div>
-            </form>
-            <div class="results" id="bRes">
-                <div class="section-title">Натальная карта</div>
-                <div class="chart" id="bChart"></div>
-            </div>
-        </div>
-        <div id="bHoro" style="display:none;">
-            <div class="section-title" style="margin-top: 25px;">Бизнес прогноз</div>
-            <div class="cards" id="bCards"></div>
-            <div style="margin-top: 25px;">
-                <div class="section-title">Энергия по дням</div>
-                <div class="days" id="bDays"></div>
-            </div>
-        </div>
-    </div>
-</div>
+<button onclick="calcPersonal()">Рассчитать</button>
+
+<div id="pChart" style="margin-top:20px;"></div>
 
 <script>
-    const ZODIAC = ['♈ Овен', '♉ Телец', '♊ Близнецы', '♋ Рак', '♌ Лев', '♍ Дева',
-                    '♎ Весы', '♏ Скорпион', '♐ Стрелец', '♑ Козерог', '♒ Водолей', '♓ Рыбы'];
-    
-    const ZODIAC_TYPES = {
-        'Овен': 'Огонь', 'Лев': 'Огонь', 'Стрелец': 'Огонь',
-        'Телец': 'Земля', 'Дева': 'Земля', 'Козерог': 'Земля',
-        'Близнецы': 'Воздух', 'Весы': 'Воздух', 'Водолей': 'Воздух',
-        'Рак': 'Вода', 'Скорпион': 'Вода', 'Рыбы': 'Вода'
-    };
 
-    function getJulianDay(date) {
-        const y = date.getFullYear();
-        const m = date.getMonth() + 1;
-        const d = date.getDate() + date.getHours() / 24 + date.getMinutes() / 1440;
-        
-        let a = Math.floor((14 - m) / 12);
-        let jy = y + 4800 - a;
-        let jm = m + 12 * a - 3;
-        
-        return d + Math.floor((153 * jm + 2) / 5) + 365 * jy + Math.floor(jy / 4) - Math.floor(jy / 100) + Math.floor(jy / 400) - 32045.5;
-    }
+// ---------- БАЗА ----------
 
-    function calcSunLongitude(jd) {
-        const T = (jd - 2451545.0) / 36525.0;
-        const L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
-        const M = 357.52911 + 35999.05029 * T - 0.0001536 * T * T;
-        const M_rad = M * Math.PI / 180;
-        const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M_rad) +
-                  (0.019993 - 0.000101 * T) * Math.sin(2 * M_rad) + 
-                  0.000029 * Math.sin(3 * M_rad);
-        return ((L0 + C) % 360 + 360) % 360;
-    }
+const ZODIAC = ['Овен','Телец','Близнецы','Рак','Лев','Дева','Весы','Скорпион','Стрелец','Козерог','Водолей','Рыбы'];
 
-    function calcMoonLongitude(jd) {
-        const T = (jd - 2451545.0) / 36525.0;
-        const Lprime = 218.3164477 + 481267.88123421 * T - 0.0015786 * T * T + T * T * T / 538841 - T * T * T * T / 65194000;
-        const D = 297.8501921 + 445267.1114469 * T - 0.0018695 * T * T + T * T * T / 545868 - T * T * T * T / 113065000;
-        const M = 357.52910918 + 35999.05029094 * T;
-        const Mprime = 134.96298139 + 477198.8675055 * T + 0.0087414 * T * T + T * T * T / 69699 - T * T * T * T / 14712000;
-        
-        const D_rad = D * Math.PI / 180;
-        const M_rad = M * Math.PI / 180;
-        const Mprime_rad = Mprime * Math.PI / 180;
-        
-        const arg1 = 6.28875 * Math.sin(Mprime_rad);
-        const arg2 = 1.27402 * Math.sin(2 * D_rad - Mprime_rad);
-        const arg3 = 0.66871 * Math.sin(2 * D_rad);
-        const arg4 = 0.21490 * Math.sin(2 * Mprime_rad);
-        const arg5 = -0.19956 * Math.sin(M_rad);
-        const arg6 = -0.11864 * Math.sin(2 * D_rad - 2 * Mprime_rad);
-        const arg7 = 0.10857 * Math.sin(2 * D_rad - M_rad - Mprime_rad);
-        
-        const lon = Lprime + arg1 + arg2 + arg3 + arg4 + arg5 + arg6 + arg7;
-        return ((lon % 360) + 360) % 360;
-    }
-
-    function calcMercuryLongitude(jd) {
-        const T = (jd - 2451545.0) / 36525.0;
-        const L = 252.25032 + 149472.67411 * T + 0.00021 * T * T;
-        const M = (L - 100.46457) % 360;
-        const M_rad = M * Math.PI / 180;
-        const e = 0.20563593 + 0.000020 * T;
-        const E = M_rad + e * Math.sin(M_rad) * (1 + e * Math.cos(M_rad)) / (1 - e * e);
-        const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
-        return ((100.46457 + (nu * 180 / Math.PI)) % 360 + 360) % 360;
-    }
-
-    function calcVenusLongitude(jd) {
-        const T = (jd - 2451545.0) / 36525.0;
-        const L = 181.97973 + 58517.80666 * T + 0.00005 * T * T;
-        const M = (L - 131.56237) % 360;
-        const M_rad = M * Math.PI / 180;
-        const e = 0.00677323;
-        const E = M_rad + e * Math.sin(M_rad) * (1 + e * Math.cos(M_rad)) / (1 - e * e);
-        const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
-        return ((131.56237 + (nu * 180 / Math.PI)) % 360 + 360) % 360;
-    }
-
-    function calcMarsLongitude(jd) {
-        const T = (jd - 2451545.0) / 36525.0;
-        const L = 355.43333 + 19140.29970 * T + 0.00005 * T * T;
-        const M = (L - 49.55424) % 360;
-        const M_rad = M * Math.PI / 180;
-        const e = 0.09341233 + 0.000093 * T;
-        const E = M_rad + e * Math.sin(M_rad) * (1 + e * Math.cos(M_rad)) / (1 - e * e);
-        const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
-        return ((49.55424 + (nu * 180 / Math.PI)) % 360 + 360) % 360;
-    }
-
-    function getZodiacSign(lon) {
-        lon = ((lon % 360) + 360) % 360;
-        return ZODIAC[Math.floor(lon / 30)];
-    }
-
-    function getZodiacBase(sign) {
-        return sign.split(' ')[1];
-    }
-
-    function calcPlanets(date) {
-        const jd = getJulianDay(date);
-        return {
-            sun: calcSunLongitude(jd),
-            moon: calcMoonLongitude(jd),
-            mercury: calcMercuryLongitude(jd),
-            venus: calcVenusLongitude(jd),
-            mars: calcMarsLongitude(jd)
-        };
-    }
-
-    function generateRecommendations(planets, period) {
-        const moonSign = getZodiacSign(planets.moon);
-        const moonBase = getZodiacBase(moonSign);
-        const moonType = ZODIAC_TYPES[moonBase];
-        
-        const venusSign = getZodiacSign(planets.venus);
-        const venusBase = getZodiacBase(venusSign);
-        
-        const mercurySign = getZodiacSign(planets.mercury);
-        const mercuryBase = getZodiacBase(mercurySign);
-        
-        const marsSign = getZodiacSign(planets.mars);
-        const marsBase = getZodiacBase(marsSign);
-        
-        if (period === 'today') {
-            return [
-                {
-                    t: '😊 Настроение',
-                    txt: `Луна в ${moonSign} (${moonType}). ${moonType === 'Вода' ? 'Доверьте интуиции - она необычно острая.' : moonType === 'Огонь' ? 'Энергия на максимуме, используйте смело.' : moonType === 'Воздух' ? 'Общайтесь, делитесь идеями и мыслями.' : 'Вам нужна стабильность и уют.'} Это ваша естественная энергия сегодня.`,
-                    r: moonType === 'Вода' || moonType === 'Огонь' ? 4 : 3
-                },
-                {
-                    t: '💰 Финансы',
-                    txt: `Венера в ${venusSign}. ${venusBase === 'Телец' || venusBase === 'Весы' ? 'Покупайте то, что дарует радость. Инвестируйте в качество и красоту.' : venusBase === 'Козерог' ? 'Экономьте. День для копления, не для трат.' : venusBase === 'Дева' ? 'Анализируйте расходы. Создавайте систему.' : 'Стабильный день. Ничего экстремального.'}`,
-                    r: venusBase === 'Телец' || venusBase === 'Весы' ? 4 : 3
-                },
-                {
-                    t: '📈 Бизнес',
-                    txt: `Меркурий в ${mercurySign}. ${mercuryBase === 'Близнецы' || mercuryBase === 'Дева' ? 'Ваши слова убедительны. Проводите встречи. Завершайте контракты.' : mercuryBase === 'Стрелец' ? 'Риск неточности. Проверяйте цифры дважды.' : 'День для аналитики и планирования.'}`,
-                    r: mercuryBase === 'Близнецы' || mercuryBase === 'Дева' ? 5 : 3
-                },
-                {
-                    t: '🤝 Переговоры',
-                    txt: 'Меркурий поддерживает. Партнёры слушают вас. Проводите встречи 10:00-16:00. Говорите ясно.',
-                    r: 4
-                },
-                {
-                    t: '💑 Отношения',
-                    txt: `Венера ведёт чувства. ${venusBase === 'Лев' ? 'Щедрость и величие. Выражайте открыто.' : venusBase === 'Скорпион' ? 'Интенсивность. День для важных разговоров.' : venusBase === 'Рыбы' ? 'Нежность и мечты. Романтика в воздухе.' : 'Внимательность. Маленькие заботы важны.'}`,
-                    r: venusBase === 'Лев' ? 5 : venusBase === 'Рыбы' ? 4 : 3
-                },
-                {
-                    t: '💖 Любовь',
-                    txt: `Марс в ${marsSign} разжигает страсть. ${marsBase === 'Овен' || marsBase === 'Лев' ? 'Смелость и решимость. Не стесняйтесь.' : marsBase === 'Скорпион' ? 'Магнетизм. Вы притягиваете.' : marsBase === 'Дева' ? 'Забота и внимание к деталям.' : 'Будьте внимательны. Импульсы могут навредить.'}`,
-                    r: marsBase === 'Овен' || marsBase === 'Лев' || marsBase === 'Стрелец' ? 5 : 3
-                }
-            ];
-        } else if (period === 'tomorrow') {
-            return [
-                {t: '😊 Настроение', txt: 'Завтра Луна сместится. Адаптируйтесь. День для внутренней работы, не для подвигов.', r: 2},
-                {t: '💰 Финансы', txt: 'День осторожности. Избегайте спонтанных решений. Отложите крупные покупки.', r: 2},
-                {t: '📈 Бизнес', txt: 'Меркурий замедляется. Доделывайте старое. Новое начните в другой день.', r: 2},
-                {t: '🤝 Переговоры', txt: 'Требует подготовки. Партнёры менее открыты. Перенесите встречи на несколько дней.', r: 2},
-                {t: '💑 Отношения', txt: 'День для поддержки. Партнёр может быть грустным. Просто слушайте.', r: 3},
-                {t: '💖 Любовь', txt: 'Романтика отступает. День для нежности, не для страсти. Будьте рядом.', r: 3}
-            ];
-        } else if (period === 'week') {
-            return [
-                {t: '😊 Настроение', txt: 'От спокойствия к энергии. К четвергу волна растёт. Это естественный ритм.', r: 3},
-                {t: '💰 Финансы', txt: 'Начало медленно. К середине возможности. Четверг-пятница - лучшие. Конец - учёт.', r: 3},
-                {t: '📈 Бизнес', txt: 'Вторник и четверг - ключевые дни. Среда - требует ухода. Пятница - планирование.', r: 4},
-                {t: '🤝 Переговоры', txt: 'Вт и чт - лучшие. Ср - конфликты. Проводите встречи вт/чт.', r: 3},
-                {t: '💑 Отношения', txt: 'Волнообразно. Пн - спокойствие, ср - недопонимание, чт-пт - сближение.', r: 3},
-                {t: '💖 Любовь', txt: 'Волна к концу. Четверг - начните разговоры. Выходные - романтика.', r: 4}
-            ];
-        } else {
-            return [
-                {t: '😊 Настроение', txt: 'Месяц преобразований. Неделя 1 - подготовка, 2 - действие, 3 - переосмысление, 4 - завершение.', r: 4},
-                {t: '💰 Финансы', txt: 'Пики: 12-15 и 24-28. Инвестируйте тогда. Избегайте 8-11 (кризис).', r: 3},
-                {t: '📈 Бизнес', txt: 'План (1-7), реализация (8-15), корректировка (16-22), завершение (23-30).', r: 4},
-                {t: '🤝 Переговоры', txt: 'Сильные периоды: 3-7, 12-15, 24-28. Контракты - в эти дни. Избегайте 8-11.', r: 4},
-                {t: '💑 Отношения', txt: 'Развитие и укрепление. 1-я половина - активность, 2-я - стабилизация.', r: 3},
-                {t: '💖 Любовь', txt: 'Месяц страсти. Пики: 12-15 и 24-28. Важные шаги делайте тогда.', r: 5}
-            ];
-        }
-    }
-
-    function startMode(m) {
-        document.getElementById('modeSelect').classList.remove('active');
-        document.getElementById(m === 'p' ? 'personal' : 'business').classList.add('active');
-    }
-
-    function backMode() {
-        document.getElementById('personal').classList.remove('active');
-        document.getElementById('business').classList.remove('active');
-        document.getElementById('modeSelect').classList.add('active');
-    }
-
-    function calcPersonal(e) {
-        e.preventDefault();
-        const dateInput = document.getElementById('pDate');
-        if (!dateInput.value) return;
-        
-        const [y, m, d] = dateInput.value.split('-');
-        const [h, min] = document.getElementById('pTime').value.split(':');
-        const date = new Date(y, m - 1, d, h, min);
-        
-        const planets = calcPlanets(date);
-        displayChart('p', planets);
-        document.getElementById('pRes').classList.add('active');
-        renderPHoro(planets);
-        document.getElementById('pHoro').style.display = 'block';
-    }
-
-    function calcBusiness(e) {
-        e.preventDefault();
-        const dateInput = document.getElementById('bDate');
-        if (!dateInput.value) return;
-        
-        const [y, m, d] = dateInput.value.split('-');
-        const [h, min] = document.getElementById('bTime').value.split(':');
-        const date = new Date(y, m - 1, d, h, min);
-        
-        const planets = calcPlanets(date);
-        displayChart('b', planets);
-        document.getElementById('bRes').classList.add('active');
-        renderBHoro(planets);
-        document.getElementById('bHoro').style.display = 'block';
-    }
-
-    function displayChart(mode, planets) {
-        const html = `
-            <div class="chart-item"><div class="chart-label">☀️ Солнце</div><div class="chart-value">${getZodiacSign(planets.sun)}</div></div>
-            <div class="chart-item"><div class="chart-label">🌙 Луна</div><div class="chart-value">${getZodiacSign(planets.moon)}</div></div>
-            <div class="chart-item"><div class="chart-label">💬 Меркурий</div><div class="chart-value">${getZodiacSign(planets.mercury)}</div></div>
-            <div class="chart-item"><div class="chart-label">💖 Венера</div><div class="chart-value">${getZodiacSign(planets.venus)}</div></div>
-            <div class="chart-item"><div class="chart-label">⚔️ Марс</div><div class="chart-value">${getZodiacSign(planets.mars)}</div></div>
-            <div class="chart-item"><div class="chart-label">📍 Узлы</div><div class="chart-value">${getZodiacSign(planets.moon + 180)}</div></div>
-        `;
-        document.getElementById(mode === 'p' ? 'pChart' : 'bChart').innerHTML = html;
-    }
-
-    function renderPHoro(planets) {
-        const period = document.querySelector('#pForm .period-btn.active').dataset.p;
-        const recs = generateRecommendations(planets, period);
-        
-        let html = '';
-        recs.forEach(i => {
-            let stars = '';
-            for (let j = 0; j < 5; j++) {
-                stars += j < i.r ? '<span class="star">★</span>' : '<span class="star empty">★</span>';
-            }
-            html += `<div class="card"><div class="card-title">${i.t}</div><p class="card-text">${i.txt}</p><div class="stars">${stars}</div></div>`;
-        });
-        document.getElementById('pCards').innerHTML = html;
-        renderDays('p');
-    }
-
-    function renderBHoro(planets) {
-        const period = document.querySelector('#bForm .period-btn.active').dataset.p;
-        
-        const businessRecs = {
-            today: [
-                {t: '🤝 Переговоры', txt: 'Благоприятный день. Проводите встречи. Партнёры открыты.'},
-                {t: '💼 Работа', txt: 'Продуктивность выше среднего. Завершайте проекты.'},
-                {t: '💰 Финансы', txt: 'Стабильный день. Избегайте рисков. Планируйте.'},
-                {t: '📊 Аналитика', txt: 'Ясность мышления. День для анализа данных.'},
-                {t: '🎯 Цели', txt: 'День для стратегического планирования.'},
-                {t: '⭐ Совет', txt: 'Доверьте интуиции. Она вас не подведёт.'}
-            ],
-            tomorrow: [
-                {t: '🤝 Переговоры', txt: 'Требует подготовки. Перенесите если возможно.'},
-                {t: '💼 Работа', txt: 'Медленный старт. Доделывайте старое.'},
-                {t: '💰 Финансы', txt: 'Потоки замедлены. Ждите улучшения.'},
-                {t: '📊 Аналитика', txt: 'День для глубокого анализа.'},
-                {t: '🎯 Цели', txt: 'Пересмотрите стратегию.'},
-                {t: '⭐ Совет', txt: 'Слушайте больше, говорите меньше.'}
-            ],
-            week: [
-                {t: '🤝 Переговоры', txt: 'Вт, Чт, Сб благоприятны. Ср требует осторожности.'},
-                {t: '💼 Работа', txt: 'Активная неделя. Четверг - пик продуктивности.'},
-                {t: '💰 Финансы', txt: 'Благоприятная неделя. Начинайте новое.'},
-                {t: '📊 Аналитика', txt: 'Хорошо для стратегических решений.'},
-                {t: '🎯 Цели', txt: 'Неделя прогресса. Действуйте уверенно.'},
-                {t: '⭐ Совет', txt: 'Баланс действия и анализа - ключ успеха.'}
-            ],
-            month: [
-                {t: '🤝 Переговоры', txt: 'Сильные даты: 3-7, 12-15, 24-28. Контракты тогда.'},
-                {t: '💼 Работа', txt: 'План, реализация, корректировка, завершение.'},
-                {t: '💰 Финансы', txt: 'Постоянный рост. Максимум к концу месяца.'},
-                {t: '📊 Аналитика', txt: 'Месяц для стратегических решений.'},
-                {t: '🎯 Цели', txt: 'Месяц достижений. Мобилизуйте ресурсы.'},
-                {t: '⭐ Совет', txt: 'Используйте силу месяца полностью.'}
-            ]
-        };
-        
-        let html = '';
-        businessRecs[period].forEach(i => {
-            html += `<div class="card"><div class="card-title">${i.t}</div><p class="card-text">${i.txt}</p></div>`;
-        });
-        document.getElementById('bCards').innerHTML = html;
-        renderDays('b');
-    }
-
-    function renderDays(mode) {
-        const en = [65, 55, 48, 72, 60, 78, 70];
-        const dn = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-        let html = '';
-        en.forEach((e, i) => {
-            html += `<div class="day ${e > 60 ? 'good' : 'bad'}"><div>${dn[i]}</div><div>${e}%</div></div>`;
-        });
-        document.getElementById(mode === 'p' ? 'pDays' : 'bDays').innerHTML = html;
-    }
-
-    function clearP() {
-        document.getElementById('pForm').reset();
-        document.getElementById('pRes').classList.remove('active');
-        document.getElementById('pHoro').style.display = 'none';
-    }
-
-    function clearB() {
-        document.getElementById('bForm').reset();
-        document.getElementById('bRes').classList.remove('active');
-        document.getElementById('bHoro').style.display = 'none';
-    }
-
-    document.querySelectorAll('.period-btn').forEach(b => {
-        b.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.target.parentElement.querySelectorAll('.period-btn').forEach(x => x.classList.remove('active'));
-            e.target.classList.add('active');
-            
-            const form = e.target.closest('form');
-            const dateInput = form.querySelector('input[type="date"]');
-            if (dateInput.value) {
-                const [y, m, d] = dateInput.value.split('-');
-                const [h, min] = form.querySelector('input[type="time"]').value.split(':');
-                const date = new Date(y, m - 1, d, h, min);
-                const planets = calcPlanets(date);
-                
-                if (form === document.getElementById('pForm')) {
-                    renderPHoro(planets);
-                } else {
-                    renderBHoro(planets);
-                }
-            }
-        });
-    });
-    // ===== FIX + НОРМАЛЬНЫЕ РАСЧЁТЫ =====
-
-// нормализация углов
 function norm360(x){
-    return ((x % 360) + 360) % 360;
+return ((x % 360) + 360) % 360;
 }
 
-// исправляем sign
-const oldSign = getZodiacSign;
-getZodiacSign = function(lon){
-    return ZODIAC[Math.floor(norm360(lon) / 30)];
+function getZodiac(lon){
+return ZODIAC[Math.floor(norm360(lon)/30)];
 }
 
-// исправляем планеты
-const oldCalc = calcPlanets;
-calcPlanets = function(date){
+// ---------- ЮЛИАНСКИЙ ДЕНЬ ----------
 
-    const jd = getJulianDay(date);
+function getJulianDay(date){
+const y = date.getFullYear();
+const m = date.getMonth()+1;
+const d = date.getDate() + date.getHours()/24;
 
-    function sun(j){
-        const T = (j - 2451545.0) / 36525.0;
-        const L0 = 280.46646 + 36000.76983 * T;
-        const M = 357.52911 + 35999.05029 * T;
-        const C = 1.914 * Math.sin(M * Math.PI / 180);
-        return norm360(L0 + C);
-    }
+let a = Math.floor((14-m)/12);
+let y2 = y+4800-a;
+let m2 = m+12*a-3;
 
-    function moon(j){
-        return norm360(218.3 + 13.176 * (j - 2451545));
-    }
-
-    function mercury(j){
-        return norm360(sun(j) + 20);
-    }
-
-    function venus(j){
-        return norm360(sun(j) - 45);
-    }
-
-    function mars(j){
-        return norm360(moon(j) + 60);
-    }
-
-    return {
-        sun: sun(jd),
-        moon: moon(jd),
-        mercury: mercury(jd),
-        venus: venus(jd),
-        mars: mars(jd)
-    };
+return d + Math.floor((153*m2+2)/5)+365*y2+Math.floor(y2/4)-Math.floor(y2/100)+Math.floor(y2/400)-32045;
 }
 
-// ===== ДОБАВЛЯЕМ ТРАНЗИТЫ (СЕГОДНЯ) =====
+// ---------- ПЛАНЕТЫ (упрощённо) ----------
 
-function getTodayPlanets(){
-    return calcPlanets(new Date());
+function calcPlanets(date){
+
+const jd = getJulianDay(date);
+
+const sun = norm360(280 + 0.985647 * (jd-2451545));
+const moon = norm360(218 + 13.176 * (jd-2451545));
+
+return {sun,moon};
 }
 
-// ===== УЛУЧШАЕМ ЛОГИКУ ПРОГНОЗА =====
+// ---------- ГОРОД → КООРДИНАТЫ ----------
 
-const oldGen = generateRecommendations;
-generateRecommendations = function(planets){
+async function getCoords(city){
 
-    const today = getTodayPlanets();
+const url = "https://nominatim.openstreetmap.org/search?format=json&q=" + encodeURIComponent(city);
 
-    const natalMoon = getZodiacSign(planets.moon);
-    const todayMoon = getZodiacSign(today.moon);
+const res = await fetch(url);
+const data = await res.json();
 
-    const natalVenus = getZodiacSign(planets.venus);
-    const todayVenus = getZodiacSign(today.venus);
+if(!data.length) return null;
 
-    const natalMars = getZodiacSign(planets.mars);
-    const todayMars = getZodiacSign(today.mars);
-
-    return [
-        {
-            t: '💭 Эмоциональный фон',
-            txt: natalMoon === todayMoon
-                ? 'Сегодня эмоциональный фон совпадает с вашей природой. Состояние стабильное.'
-                : 'Эмоциональный фон отличается от привычного. Возможна внутренняя нестабильность.'
-        },
-        {
-            t: '💑 Отношения',
-            txt: natalVenus === todayVenus
-                ? 'Гармоничный день для общения и сближения.'
-                : 'Потребуется больше внимания к партнёру. Возможны разночтения.'
-        },
-        {
-            t: '💰 Деньги',
-            txt: todayVenus.includes('Телец') || todayVenus.includes('Весы')
-                ? 'Благоприятный день для финансовых решений.'
-                : 'Лучше избегать импульсивных трат.'
-        },
-        {
-            t: '⭐ Совет дня',
-            txt: natalMars === todayMars
-                ? 'Действуйте активно. Энергия совпадает с вашим ритмом.'
-                : 'Не торопитесь. Сегодня лучше стратегия, чем давление.'
-        }
-    ];
+return {
+lat: parseFloat(data[0].lat),
+lon: parseFloat(data[0].lon)
+};
 }
 
-// ===== БИЗНЕС ТОЖЕ ЧИНИМ =====
+// ---------- ASC ----------
 
-generateBusinessRecommendations = function(planets){
+function calcASC(date, lat, lon){
 
-    const today = getTodayPlanets();
+const jd = getJulianDay(date);
 
-    const mercury = getZodiacSign(today.mercury);
-    const mars = getZodiacSign(today.mars);
+let GMST = 280.46061837 + 360.98564736629 * (jd-2451545);
+GMST = norm360(GMST);
 
-    return [
-        {
-            t: '💼 Работа',
-            txt: mars.includes('Овен') || mars.includes('Лев')
-                ? 'Высокая продуктивность. Можно двигать проекты.'
-                : 'Лучше сосредоточиться на текущих задачах.'
-        },
-        {
-            t: '🤝 Переговоры',
-            txt: mercury.includes('Близнецы') || mercury.includes('Дева')
-                ? 'Хороший день для переговоров и договорённостей.'
-                : 'Проверяйте детали. Возможны ошибки.'
-        },
-        {
-            t: '💰 Финансы',
-            txt: 'Принимайте решения только после анализа. День не для риска.'
-        },
-        {
-            t: '⭐ Совет',
-            txt: 'Сосредоточьтесь на ключевых задачах. Не распыляйтесь.'
-        }
-    ];
+const LST = norm360(GMST + lon);
+
+const e = 23.4393 * Math.PI/180;
+
+const latRad = lat * Math.PI/180;
+const lstRad = LST * Math.PI/180;
+
+const asc = Math.atan2(
+Math.cos(lstRad),
+-Math.sin(lstRad)*Math.cos(e) - Math.tan(latRad)*Math.sin(e)
+);
+
+return norm360(asc * 180/Math.PI);
 }
+
+// ---------- ДОМА ----------
+
+function calcHouses(asc){
+
+let houses = [];
+
+for(let i=0;i<12;i++){
+houses.push(norm360(asc + i*30));
+}
+
+return houses;
+}
+
+// ---------- ОСНОВНОЙ РАСЧЁТ ----------
+
+async function calcPersonal(){
+
+const city = document.getElementById('pPlace').value;
+
+if(!city){
+alert("Введите город");
+return;
+}
+
+const coords = await getCoords(city);
+
+if(!coords){
+alert("Город не найден");
+return;
+}
+
+const dateInput = document.getElementById('pDate').value;
+const timeInput = document.getElementById('pTime').value;
+
+const [y,m,d] = dateInput.split('-');
+const [h,min] = timeInput.split(':');
+
+const date = new Date(y, m-1, d, h, min);
+
+const planets = calcPlanets(date);
+
+const asc = calcASC(date, coords.lat, coords.lon);
+
+const houses = calcHouses(asc);
+
+// ---------- ВЫВОД ----------
+
+let html = "";
+
+html += "<b>Солнце:</b> " + getZodiac(planets.sun) + "<br>";
+html += "<b>Луна:</b> " + getZodiac(planets.moon) + "<br>";
+html += "<b>ASC:</b> " + getZodiac(asc) + "<br><br>";
+
+html += "<b>Дома:</b><br>";
+
+houses.forEach((h,i)=>{
+html += (i+1) + " дом: " + getZodiac(h) + "<br>";
+});
+
+document.getElementById('pChart').innerHTML = html;
+
+}
+
 </script>
-```
 
 </body>
 </html>
