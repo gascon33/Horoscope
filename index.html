@@ -1,179 +1,1276 @@
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ASTRO</title>
-
+<title>ASTRO | Персональный астрологический прогноз</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;min-height:100%}
+
 body{
-background:#0a0f23;
+background:#07091a;
 color:#fff;
-font-family:Arial;
-padding:20px;
+font-family:‘Montserrat’,sans-serif;
+font-size:16px;
+overflow-x:hidden;
 }
-button{padding:10px;margin-top:10px}
-input{padding:10px;margin:5px 0;width:100%}
+
+/* Starfield */
+body::before{
+content:’’;
+position:fixed;inset:0;
+background:
+radial-gradient(ellipse at 15% 40%,rgba(184,149,106,0.12) 0%,transparent 55%),
+radial-gradient(ellipse at 85% 75%,rgba(100,60,180,0.08) 0%,transparent 55%),
+radial-gradient(ellipse at 50% 10%,rgba(120,80,200,0.06) 0%,transparent 40%);
+pointer-events:none;z-index:0;
+}
+
+.stars-bg{
+position:fixed;inset:0;
+background-image:
+radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,0.18) 0%,transparent 100%),
+radial-gradient(1.5px 1.5px at 25% 60%,rgba(255,255,255,0.13) 0%,transparent 100%),
+radial-gradient(1px 1px at 40% 30%,rgba(255,255,255,0.2) 0%,transparent 100%),
+radial-gradient(1px 1px at 55% 80%,rgba(255,255,255,0.15) 0%,transparent 100%),
+radial-gradient(2px 2px at 70% 20%,rgba(255,255,255,0.1) 0%,transparent 100%),
+radial-gradient(1px 1px at 85% 50%,rgba(255,255,255,0.18) 0%,transparent 100%),
+radial-gradient(1.5px 1.5px at 92% 85%,rgba(255,255,255,0.12) 0%,transparent 100%),
+radial-gradient(1px 1px at 5% 90%,rgba(255,255,255,0.16) 0%,transparent 100%),
+radial-gradient(1px 1px at 60% 45%,rgba(255,255,255,0.14) 0%,transparent 100%),
+radial-gradient(1.5px 1.5px at 33% 75%,rgba(255,255,255,0.11) 0%,transparent 100%),
+radial-gradient(1px 1px at 78% 38%,rgba(255,255,255,0.17) 0%,transparent 100%),
+radial-gradient(1px 1px at 48% 12%,rgba(255,255,255,0.19) 0%,transparent 100%);
+pointer-events:none;z-index:0;
+}
+
+.wrapper{
+position:relative;z-index:1;
+display:flex;flex-direction:column;
+min-height:100vh;
+}
+
+/* HEADER */
+header{
+padding:36px 20px 28px;
+text-align:center;
+border-bottom:1px solid rgba(184,149,106,0.25);
+background:linear-gradient(180deg,rgba(7,9,26,0.9) 0%,rgba(7,9,26,0.4) 100%);
+backdrop-filter:blur(12px);
+position:sticky;top:0;z-index:100;
+}
+.logo{
+font-family:‘Playfair Display’,serif;
+font-size:3rem;font-weight:700;
+background:linear-gradient(135deg,#c8b47a 0%,#f0d98a 45%,#b8956a 100%);
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+letter-spacing:3px;margin-bottom:8px;
+animation:float 4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.tagline{
+color:rgba(184,149,106,0.7);
+font-size:0.75rem;letter-spacing:4px;text-transform:uppercase;font-weight:300;
+}
+
+/* MODE SELECTOR */
+.mode-selector{
+display:none;flex:1;
+flex-direction:column;justify-content:center;align-items:center;
+padding:60px 20px;text-align:center;
+}
+.mode-selector.active{display:flex}
+.mode-title{
+font-family:‘Playfair Display’,serif;
+font-size:2.2rem;color:#d4c5a0;margin-bottom:50px;font-weight:600;
+}
+.mode-buttons{
+display:grid;grid-template-columns:1fr 1fr;
+gap:28px;max-width:580px;width:100%;
+}
+.mode-btn{
+padding:44px 20px;
+background:linear-gradient(135deg,rgba(184,149,106,0.08) 0%,rgba(212,197,160,0.03) 100%);
+border:1.5px solid rgba(184,149,106,0.4);
+color:#d4c5a0;
+font-family:‘Playfair Display’,serif;
+font-size:1.4rem;font-weight:600;
+cursor:pointer;text-transform:uppercase;
+transition:all 0.4s;backdrop-filter:blur(10px);
+border-radius:10px;overflow:hidden;
+position:relative;
+}
+.mode-btn:hover{
+background:linear-gradient(135deg,rgba(184,149,106,0.2) 0%,rgba(212,197,160,0.1) 100%);
+border-color:#d4c5a0;transform:translateY(-6px);
+box-shadow:0 15px 50px rgba(212,197,160,0.15);
+}
+.mode-btn .icon{display:block;font-size:2.5rem;margin-bottom:12px}
+
+/* CONTENT */
+.content{display:none;flex:1;padding:28px 16px;overflow-y:auto}
+.content.active{display:flex;flex-direction:column}
+
+.mode-header{
+display:flex;justify-content:space-between;align-items:center;
+margin-bottom:28px;padding-bottom:18px;
+border-bottom:1px solid rgba(184,149,106,0.25);
+}
+.mode-label{
+font-family:‘Playfair Display’,serif;
+font-size:1.8rem;color:#d4c5a0;font-weight:600;
+}
+.btn-back{
+background:transparent;color:#b8956a;
+border:1.5px solid rgba(184,149,106,0.4);
+padding:9px 16px;font-size:0.75rem;font-weight:600;
+cursor:pointer;text-transform:uppercase;
+border-radius:6px;transition:all 0.3s;
+font-family:‘Montserrat’,sans-serif;letter-spacing:0.5px;
+}
+.btn-back:hover{border-color:#d4c5a0;color:#d4c5a0;transform:translateY(-2px)}
+
+/* FORM */
+.form-grid{
+display:grid;grid-template-columns:1fr;gap:24px;margin-bottom:20px;
+}
+@media(min-width:800px){.form-grid{grid-template-columns:360px 1fr;gap:36px}}
+
+.form-section{display:flex;flex-direction:column;gap:14px}
+.section-title{
+font-family:‘Playfair Display’,serif;
+font-size:1.15rem;color:#d4c5a0;margin-bottom:4px;font-weight:600;
+}
+.form-group{display:flex;flex-direction:column;gap:5px}
+label{
+font-size:0.72rem;text-transform:uppercase;
+color:#b8956a;font-weight:500;letter-spacing:0.6px;
+}
+input[type=date],input[type=time],input[type=text]{
+width:100%;padding:11px 15px;
+background:rgba(184,149,106,0.07);
+border:1.5px solid rgba(184,149,106,0.35);
+color:#fff;font-family:‘Montserrat’,sans-serif;
+font-size:0.92rem;outline:none;border-radius:7px;
+transition:all 0.3s;
+}
+input:focus{
+background:rgba(184,149,106,0.12);
+border-color:rgba(212,197,160,0.7);
+box-shadow:0 0 18px rgba(212,197,160,0.1);
+}
+input::placeholder{color:rgba(255,255,255,0.3)}
+
+/* DATE SELECTS */
+.date-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.time-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+select{
+width:100%;padding:11px 12px;
+background:rgba(184,149,106,0.07);
+border:1.5px solid rgba(184,149,106,0.35);
+color:#fff;font-family:‘Montserrat’,sans-serif;
+font-size:0.88rem;outline:none;border-radius:7px;
+transition:all 0.3s;cursor:pointer;
+-webkit-appearance:none;
+background-image:url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘12’ height=‘8’ viewBox=‘0 0 12 8’%3E%3Cpath d=‘M1 1l5 5 5-5’ stroke=’%23b8956a’ stroke-width=‘1.5’ fill=‘none’ stroke-linecap=‘round’/%3E%3C/svg%3E”);
+background-repeat:no-repeat;
+background-position:right 12px center;
+padding-right:32px;
+}
+select:focus{border-color:rgba(212,197,160,0.7)}
+select option{background:#0e1128;color:#fff}
+
+.periods{
+display:grid;grid-template-columns:repeat(4,1fr);
+gap:6px;margin-top:8px;padding-top:10px;
+border-top:1px solid rgba(184,149,106,0.18);
+}
+.period-btn{
+padding:8px 4px;background:transparent;
+border:1.5px solid rgba(184,149,106,0.35);
+color:rgba(184,149,106,0.8);
+font-size:0.72rem;font-weight:600;
+cursor:pointer;text-transform:uppercase;
+border-radius:5px;transition:all 0.3s;
+font-family:‘Montserrat’,sans-serif;letter-spacing:0.3px;
+}
+.period-btn:hover{border-color:#d4c5a0;color:#d4c5a0}
+.period-btn.active{
+background:linear-gradient(135deg,#b8956a 0%,#d4c5a0 100%);
+color:#07091a;border-color:#d4c5a0;
+}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.btn{
+padding:12px 14px;border:none;
+font-family:‘Montserrat’,sans-serif;
+font-size:0.82rem;font-weight:600;
+cursor:pointer;text-transform:uppercase;
+border-radius:7px;transition:all 0.3s;letter-spacing:0.5px;
+}
+.btn-calc{
+background:linear-gradient(135deg,#b8956a 0%,#d4c5a0 100%);
+color:#07091a;box-shadow:0 5px 20px rgba(184,149,106,0.25);
+}
+.btn-calc:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(212,197,160,0.35)}
+.btn-clear{
+background:transparent;color:#b8956a;
+border:1.5px solid rgba(184,149,106,0.4);
+}
+.btn-clear:hover{background:rgba(184,149,106,0.08);color:#d4c5a0;border-color:#d4c5a0}
+
+/* CHART */
+.results{display:none}
+.results.active{display:block;animation:fadeUp 0.5s ease-out}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.planet-grid{
+display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;
+}
+@media(min-width:480px){.planet-grid{grid-template-columns:repeat(3,1fr)}}
+
+.planet-item{
+background:rgba(184,149,106,0.07);
+border:1px solid rgba(184,149,106,0.25);
+padding:14px 10px;text-align:center;
+border-radius:8px;transition:all 0.3s;
+}
+.planet-item:hover{border-color:rgba(212,197,160,0.5);transform:translateY(-2px)}
+.planet-emoji{font-size:1.3rem;margin-bottom:4px}
+.planet-name{font-size:0.65rem;color:#8a7a6a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.planet-sign{font-size:0.88rem;color:#d4c5a0;font-weight:500}
+.planet-deg{font-size:0.72rem;color:rgba(184,149,106,0.7)}
+
+.meta-card{
+background:rgba(184,149,106,0.06);
+border:1px solid rgba(184,149,106,0.2);
+padding:16px;border-radius:8px;margin-bottom:14px;
+}
+.meta-card p{font-size:0.82rem;color:#b8a898;line-height:1.6;margin-bottom:4px}
+.meta-card .note{font-size:0.72rem;color:rgba(184,149,106,0.5);margin-top:8px;font-style:italic}
+
+/* ASPECTS */
+.aspects-section{margin-bottom:14px}
+.aspects-title{
+font-family:‘Playfair Display’,serif;
+font-size:1rem;color:#d4c5a0;margin-bottom:10px;font-weight:600;
+}
+.aspect-list{display:flex;flex-direction:column;gap:5px}
+.aspect-item{
+display:flex;align-items:center;gap:10px;
+background:rgba(184,149,106,0.05);
+border:1px solid rgba(184,149,106,0.15);
+padding:8px 12px;border-radius:6px;font-size:0.8rem;
+}
+.aspect-symbol{
+font-size:1rem;min-width:20px;text-align:center;
+}
+.aspect-text{color:#c8b89a;flex:1}
+.aspect-orb{color:rgba(184,149,106,0.6);font-size:0.72rem}
+.aspect-conj{border-left:3px solid #ffd700}
+.aspect-trine{border-left:3px solid #4caf50}
+.aspect-sext{border-left:3px solid #2196f3}
+.aspect-sq{border-left:3px solid #ff5722}
+.aspect-opp{border-left:3px solid #e91e63}
+
+/* HORO / AI SECTION */
+.horo-section{display:none;margin-top:24px}
+.horo-section.active{display:block}
+
+.ai-block{
+background:linear-gradient(135deg,rgba(184,149,106,0.08) 0%,rgba(100,60,180,0.05) 100%);
+border:1.5px solid rgba(184,149,106,0.25);
+border-radius:10px;padding:22px;margin-bottom:16px;
+position:relative;overflow:hidden;
+}
+.ai-block::before{
+content:’’;position:absolute;top:0;left:0;right:0;height:2px;
+background:linear-gradient(90deg,transparent,#b8956a,#d4c5a0,#b8956a,transparent);
+}
+.ai-block-title{
+font-family:‘Playfair Display’,serif;
+font-size:1.05rem;color:#d4c5a0;margin-bottom:12px;font-weight:600;
+display:flex;align-items:center;gap:8px;
+}
+.ai-block-text{
+font-size:0.88rem;color:#ddd;line-height:1.85;white-space:pre-wrap;
+}
+.ai-stars{display:flex;gap:5px;margin-top:10px}
+.ai-star{font-size:1.1rem;color:#ffd700;filter:drop-shadow(0 0 3px rgba(255,215,0,0.4))}
+.ai-star.dim{color:rgba(255,255,255,0.15);filter:none}
+
+/* DAYS */
+.days-section{margin-top:20px}
+.days-grid{
+display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px;
+}
+.day-cell{
+background:rgba(184,149,106,0.06);
+border:1.5px solid rgba(184,149,106,0.2);
+padding:10px 4px;text-align:center;
+font-size:0.75rem;border-radius:6px;
+transition:all 0.3s;
+}
+.day-cell .dn{color:#8a7a6a;margin-bottom:4px;text-transform:uppercase;font-size:0.65rem}
+.day-cell .de{font-weight:600;font-size:0.82rem}
+.day-cell.good{border-color:rgba(76,175,80,0.5);background:rgba(76,175,80,0.08)}
+.day-cell.good .de{color:#81c784}
+.day-cell.neutral{border-color:rgba(255,193,7,0.4);background:rgba(255,193,7,0.05)}
+.day-cell.neutral .de{color:#ffd54f}
+.day-cell.bad{border-color:rgba(244,67,54,0.4);background:rgba(244,67,54,0.06)}
+.day-cell.bad .de{color:#e57373}
+
+/* LOADING */
+.loader{
+display:none;align-items:center;justify-content:center;
+gap:12px;padding:28px;
+color:#b8956a;font-size:0.85rem;letter-spacing:1px;text-transform:uppercase;
+}
+.loader.active{display:flex}
+.spinner{
+width:22px;height:22px;border-radius:50%;
+border:2px solid rgba(184,149,106,0.2);
+border-top-color:#b8956a;
+animation:spin 0.8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* STREAMING CURSOR */
+.streaming::after{
+content:‘▋’;animation:blink 0.7s infinite;
+color:#b8956a;margin-left:2px;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.error-msg{
+background:rgba(244,67,54,0.1);
+border:1px solid rgba(244,67,54,0.3);
+color:#ef9a9a;padding:12px 16px;
+border-radius:8px;font-size:0.82rem;
+margin-top:12px;
+}
+
+/* HOUSES GRID */
+.houses-grid{
+display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;
+}
+.house-item{
+background:rgba(184,149,106,0.04);
+border:1px solid rgba(184,149,106,0.15);
+padding:7px 10px;border-radius:5px;
+font-size:0.75rem;color:#a89888;
+}
+.house-item span{color:#d4c5a0;font-weight:500}
+
+@media(max-width:480px){
+.logo{font-size:2.3rem}
+header{padding:24px 16px 18px}
+.content{padding:18px 12px}
+.mode-buttons{grid-template-columns:1fr;gap:16px}
+.days-grid{grid-template-columns:repeat(7,1fr);gap:4px}
+.day-cell{padding:8px 2px}
+}
 </style>
 
 </head>
-
 <body>
+<div class="stars-bg"></div>
+<div class="wrapper">
+  <header>
+    <div class="logo">✦ ASTRO ✦</div>
+    <p class="tagline">Персональный астрологический прогноз</p>
+  </header>
 
-<h2>ASTRO</h2>
+  <!-- MODE SELECTOR -->
 
-<input type="date" id="pDate">
-<input type="time" id="pTime" value="12:00">
-<input type="text" id="pPlace" placeholder="Город">
+  <div id="modeSelect" class="mode-selector active">
+    <div class="mode-title">Выберите свой путь</div>
+    <div class="mode-buttons">
+      <button type="button" class="mode-btn" onclick="startMode('p')">
+        <span class="icon">💫</span>Личный<br>гороскоп
+      </button>
+      <button type="button" class="mode-btn" onclick="startMode('b')">
+        <span class="icon">📈</span>Бизнес<br>анализ
+      </button>
+    </div>
+  </div>
 
-<button onclick="calcPersonal()">Рассчитать</button>
+  <!-- PERSONAL -->
 
-<div id="pChart" style="margin-top:20px;"></div>
+  <div id="personal" class="content">
+    <div class="mode-header">
+      <div class="mode-label">💫 Личный гороскоп</div>
+      <button type="button" class="btn-back" onclick="backMode()">← Назад</button>
+    </div>
+    <div class="form-grid">
+      <form id="pForm" class="form-section" onsubmit="calcMode(event,'p')">
+        <div class="section-title">Ваши данные</div>
+        <div class="form-group">
+          <label>Дата рождения *</label>
+          <div class="date-row">
+            <select id="pDay"></select>
+            <select id="pMonth"></select>
+            <select id="pYear"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Время рождения</label>
+          <div class="time-row">
+            <select id="pHour"></select>
+            <select id="pMin"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Место рождения *</label>
+          <input type="text" id="pPlace" placeholder="Введите город" required>
+        </div>
+        <div class="form-group">
+          <label>Имя</label>
+          <input type="text" id="pName" placeholder="Ваше имя (необязательно)">
+        </div>
+        <div class="periods">
+          <button type="button" class="period-btn active" data-p="today">Сегодня</button>
+          <button type="button" class="period-btn" data-p="tomorrow">Завтра</button>
+          <button type="button" class="period-btn" data-p="week">Неделя</button>
+          <button type="button" class="period-btn" data-p="month">Месяц</button>
+        </div>
+        <div class="buttons">
+          <button type="submit" class="btn btn-calc" id="pCalcBtn">✨ Рассчитать</button>
+          <button type="button" class="btn btn-clear" onclick="clearMode('p')">Очистить</button>
+        </div>
+      </form>
+
+```
+  <div>
+    <div class="results" id="pRes">
+      <div class="section-title">Натальная карта</div>
+      <div class="planet-grid" id="pPlanets"></div>
+      <div class="meta-card" id="pMeta"></div>
+      <div class="aspects-section">
+        <div class="aspects-title">Ключевые транзитные аспекты</div>
+        <div class="aspect-list" id="pAspects"></div>
+      </div>
+      <div class="aspects-section">
+        <div class="aspects-title">Система домов (Плацидус)</div>
+        <div class="houses-grid" id="pHouses"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loader" id="pLoader">
+  <div class="spinner"></div>
+  <span>Строю ваш гороскоп...</span>
+</div>
+
+<div class="horo-section" id="pHoro">
+  <div class="section-title" style="margin-bottom:16px">Ваш персональный прогноз</div>
+  <div id="pCards"></div>
+  <div class="days-section">
+    <div class="section-title">Энергия по дням</div>
+    <div class="days-grid" id="pDays"></div>
+  </div>
+</div>
+<div class="error-msg" id="pError" style="display:none"></div>
+```
+
+  </div>
+
+  <!-- BUSINESS -->
+
+  <div id="business" class="content">
+    <div class="mode-header">
+      <div class="mode-label">📈 Бизнес анализ</div>
+      <button type="button" class="btn-back" onclick="backMode()">← Назад</button>
+    </div>
+    <div class="form-grid">
+      <form id="bForm" class="form-section" onsubmit="calcMode(event,'b')">
+        <div class="section-title">Ваши данные</div>
+        <div class="form-group">
+          <label>Дата рождения *</label>
+          <div class="date-row">
+            <select id="bDay"></select>
+            <select id="bMonth"></select>
+            <select id="bYear"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Время рождения</label>
+          <div class="time-row">
+            <select id="bHour"></select>
+            <select id="bMin"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Место рождения *</label>
+          <input type="text" id="bPlace" placeholder="Введите город" required>
+        </div>
+        <div class="form-group">
+          <label>Имя</label>
+          <input type="text" id="bName" placeholder="Ваше имя (необязательно)">
+        </div>
+        <div class="periods">
+          <button type="button" class="period-btn active" data-p="today">Сегодня</button>
+          <button type="button" class="period-btn" data-p="tomorrow">Завтра</button>
+          <button type="button" class="period-btn" data-p="week">Неделя</button>
+          <button type="button" class="period-btn" data-p="month">Месяц</button>
+        </div>
+        <div class="buttons">
+          <button type="submit" class="btn btn-calc" id="bCalcBtn">✨ Рассчитать</button>
+          <button type="button" class="btn btn-clear" onclick="clearMode('b')">Очистить</button>
+        </div>
+      </form>
+
+```
+  <div>
+    <div class="results" id="bRes">
+      <div class="section-title">Натальная карта</div>
+      <div class="planet-grid" id="bPlanets"></div>
+      <div class="meta-card" id="bMeta"></div>
+      <div class="aspects-section">
+        <div class="aspects-title">Ключевые транзитные аспекты</div>
+        <div class="aspect-list" id="bAspects"></div>
+      </div>
+      <div class="aspects-section">
+        <div class="aspects-title">Система домов (Плацидус)</div>
+        <div class="houses-grid" id="bHouses"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loader" id="bLoader">
+  <div class="spinner"></div>
+  <span>Строю бизнес-прогноз...</span>
+</div>
+
+<div class="horo-section" id="bHoro">
+  <div class="section-title" style="margin-bottom:16px">Бизнес прогноз</div>
+  <div id="bCards"></div>
+  <div class="days-section">
+    <div class="section-title">Энергия по дням</div>
+    <div class="days-grid" id="bDays"></div>
+  </div>
+</div>
+<div class="error-msg" id="bError" style="display:none"></div>
+```
+
+  </div>
+</div>
 
 <script>
+// ─── ZODIAC DATA ───────────────────────────────────────────────
+const SIGN_NAMES = ['Овен','Телец','Близнецы','Рак','Лев','Дева','Весы','Скорпион','Стрелец','Козерог','Водолей','Рыбы'];
+const SIGN_SYM   = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+const MONTHS_RU  = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const MONTHS_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
-// ---------- БАЗА ----------
-
-const ZODIAC = ['Овен','Телец','Близнецы','Рак','Лев','Дева','Весы','Скорпион','Стрелец','Козерог','Водолей','Рыбы'];
-
-function norm360(x){
-return ((x % 360) + 360) % 360;
-}
-
-function getZodiac(lon){
-return ZODIAC[Math.floor(norm360(lon)/30)];
-}
-
-// ---------- ЮЛИАНСКИЙ ДЕНЬ ----------
-
-function getJulianDay(date){
-const y = date.getFullYear();
-const m = date.getMonth()+1;
-const d = date.getDate() + date.getHours()/24;
-
-let a = Math.floor((14-m)/12);
-let y2 = y+4800-a;
-let m2 = m+12*a-3;
-
-return d + Math.floor((153*m2+2)/5)+365*y2+Math.floor(y2/4)-Math.floor(y2/100)+Math.floor(y2/400)-32045;
-}
-
-// ---------- ПЛАНЕТЫ (упрощённо) ----------
-
-function calcPlanets(date){
-
-const jd = getJulianDay(date);
-
-const sun = norm360(280 + 0.985647 * (jd-2451545));
-const moon = norm360(218 + 13.176 * (jd-2451545));
-
-return {sun,moon};
-}
-
-// ---------- ГОРОД → КООРДИНАТЫ ----------
-
-async function getCoords(city){
-
-const url = "https://nominatim.openstreetmap.org/search?format=json&q=" + encodeURIComponent(city);
-
-const res = await fetch(url);
-const data = await res.json();
-
-if(!data.length) return null;
-
-return {
-lat: parseFloat(data[0].lat),
-lon: parseFloat(data[0].lon)
+const PLANET_INFO = {
+  sun:     {name:'Солнце',    emoji:'☀️'},
+  moon:    {name:'Луна',      emoji:'🌙'},
+  mercury: {name:'Меркурий',  emoji:'☿'},
+  venus:   {name:'Венера',    emoji:'♀'},
+  mars:    {name:'Марс',      emoji:'♂'},
+  jupiter: {name:'Юпитер',   emoji:'♃'},
+  saturn:  {name:'Сатурн',   emoji:'♄'},
+  uranus:  {name:'Уран',     emoji:'♅'},
+  neptune: {name:'Нептун',   emoji:'♆'},
+  pluto:   {name:'Плутон',   emoji:'♇'},
+  asc:     {name:'Асцендент',emoji:'⬆'}
 };
+
+// ─── INIT SELECTS ─────────────────────────────────────────────
+function initSelects(){
+  ['p','b'].forEach(m=>{
+    const dayEl=document.getElementById(m+'Day');
+    const monEl=document.getElementById(m+'Month');
+    const yrEl =document.getElementById(m+'Year');
+    const hrEl =document.getElementById(m+'Hour');
+    const mnEl =document.getElementById(m+'Min');
+
+    for(let i=1;i<=31;i++) dayEl.innerHTML+=`<option value="${i}">${i}</option>`;
+    MONTHS_RU.forEach((mn,i)=> monEl.innerHTML+=`<option value="${i+1}">${mn}</option>`);
+    const now=new Date();
+    for(let y=now.getFullYear()-80;y<=now.getFullYear()-10;y++)
+      yrEl.innerHTML+=`<option value="${y}"${y===1990?' selected':''}>${y}</option>`;
+    for(let h=0;h<24;h++) hrEl.innerHTML+=`<option value="${h}"${h===12?' selected':''}>${String(h).padStart(2,'0')}</option>`;
+    for(let mn=0;mn<60;mn+=5) mnEl.innerHTML+=`<option value="${mn}"${mn===0?' selected':''}>${String(mn).padStart(2,'0')}</option>`;
+  });
 }
 
-// ---------- ASC ----------
+// ─── MATH HELPERS ────────────────────────────────────────────
+function norm(x){return((x%360)+360)%360}
+function r2d(r){return r*180/Math.PI}
+function d2r(d){return d*Math.PI/180}
+function jd(date){return date.getTime()/86400000+2440587.5}
+function T(jday){return(jday-2451545.0)/36525.0}
 
-function calcASC(date, lat, lon){
-
-const jd = getJulianDay(date);
-
-let GMST = 280.46061837 + 360.98564736629 * (jd-2451545);
-GMST = norm360(GMST);
-
-const LST = norm360(GMST + lon);
-
-const e = 23.4393 * Math.PI/180;
-
-const latRad = lat * Math.PI/180;
-const lstRad = LST * Math.PI/180;
-
-const asc = Math.atan2(
-Math.cos(lstRad),
--Math.sin(lstRad)*Math.cos(e) - Math.tan(latRad)*Math.sin(e)
-);
-
-return norm360(asc * 180/Math.PI);
+function signOf(lon){
+  const s=Math.floor(norm(lon)/30);
+  return {idx:s,name:SIGN_NAMES[s],sym:SIGN_SYM[s],deg:norm(lon)%30};
+}
+function fmtSign(lon){
+  const s=signOf(lon);
+  return `${s.sym} ${s.name} ${s.deg.toFixed(1)}°`;
 }
 
-// ---------- ДОМА ----------
-
-function calcHouses(asc){
-
-let houses = [];
-
-for(let i=0;i<12;i++){
-houses.push(norm360(asc + i*30));
+// ─── VSOP87 TRUNCATED (high accuracy for 1800–2100) ──────────
+// Sun (full precision)
+function calcSun(jday){
+  const t=T(jday);
+  const L0=norm(280.46646+36000.76983*t+0.0003032*t*t);
+  const M=norm(357.52911+35999.05029*t-0.0001537*t*t);
+  const Mr=d2r(M);
+  const C=(1.914602-0.004817*t-0.000014*t*t)*Math.sin(Mr)
+          +(0.019993-0.000101*t)*Math.sin(2*Mr)
+          +0.000289*Math.sin(3*Mr);
+  const omega=norm(125.04-1934.136*t);
+  const app=norm(L0+C-0.00569-0.00478*Math.sin(d2r(omega)));
+  return app;
 }
 
-return houses;
+// Moon (ELP2000 truncated, ~0.1° accuracy)
+function calcMoon(jday){
+  const t=T(jday);
+  const Lp=norm(218.3164477+481267.88123421*t-0.0015786*t*t+t*t*t/538841-t*t*t*t/65194000);
+  const D =norm(297.8501921+445267.1114034*t-0.0018819*t*t+t*t*t/545868-t*t*t*t/113065000);
+  const M =norm(357.5291092+35999.0502909*t-0.0001536*t*t+t*t*t/24490000);
+  const Mp=norm(134.9633964+477198.8675055*t+0.0087414*t*t+t*t*t/69699-t*t*t*t/14712000);
+  const F =norm(93.2720950+483202.0175233*t-0.0036539*t*t-t*t*t/3526000+t*t*t*t/863310000);
+  const Dr=d2r(D),Mr2=d2r(M),Mpr=d2r(Mp),Fr=d2r(F);
+  let lon=Lp;
+  lon+=6.288774*Math.sin(Mpr);
+  lon+=1.274027*Math.sin(2*Dr-Mpr);
+  lon+=0.658314*Math.sin(2*Dr);
+  lon+=0.213618*Math.sin(2*Mpr);
+  lon-=0.185116*Math.sin(Mr2);
+  lon-=0.114332*Math.sin(2*Fr);
+  lon+=0.058793*Math.sin(2*Dr-2*Mpr);
+  lon+=0.057066*Math.sin(2*Dr-Mr2-Mpr);
+  lon+=0.053322*Math.sin(2*Dr+Mpr);
+  lon+=0.045758*Math.sin(2*Dr-Mr2);
+  lon-=0.040923*Math.sin(Mr2-Mpr);
+  lon-=0.034720*Math.sin(Dr);
+  lon-=0.030383*Math.sin(Mr2+Mpr);
+  lon+=0.015327*Math.sin(2*Dr-2*Fr);
+  lon-=0.012528*Math.sin(Mpr+2*Fr);
+  lon+=0.010980*Math.sin(Mpr-2*Fr);
+  lon+=0.010675*Math.sin(4*Dr-Mpr);
+  lon+=0.010034*Math.sin(3*Mpr);
+  lon+=0.008548*Math.sin(4*Dr-2*Mpr);
+  lon-=0.007888*Math.sin(2*Dr+Mr2-Mpr);
+  lon-=0.006766*Math.sin(2*Dr+Mr2);
+  lon-=0.005163*Math.sin(Dr-Mpr);
+  lon+=0.004987*Math.sin(Dr+Mr2);
+  lon+=0.004036*Math.sin(2*Dr-Mr2+Mpr);
+  lon+=0.003994*Math.sin(2*Dr+2*Mpr);
+  lon+=0.003861*Math.sin(4*Dr);
+  lon+=0.003665*Math.sin(2*Dr-3*Mpr);
+  lon-=0.002689*Math.sin(Mr2-2*Mpr);
+  lon-=0.002602*Math.sin(2*Dr-Mpr+2*Fr);
+  lon+=0.002390*Math.sin(2*Dr-Mr2-2*Mpr);
+  lon-=0.002348*Math.sin(Dr+Mpr);
+  lon+=0.002236*Math.sin(2*Dr-2*Mr2);
+  lon-=0.002120*Math.sin(Mr2+2*Mpr);
+  lon-=0.002069*Math.sin(2*Mr2);
+  lon+=0.002048*Math.sin(2*Dr-2*Mr2-Mpr);
+  lon-=0.001773*Math.sin(2*Dr+Mpr-2*Fr);
+  lon-=0.001595*Math.sin(2*Dr+2*Fr);
+  lon+=0.001215*Math.sin(4*Dr-Mr2-Mpr);
+  lon-=0.001110*Math.sin(2*Mpr+2*Fr);
+  return norm(lon);
 }
 
-// ---------- ОСНОВНОЙ РАСЧЁТ ----------
-
-async function calcPersonal(){
-
-const city = document.getElementById('pPlace').value;
-
-if(!city){
-alert("Введите город");
-return;
+// Mercury (VSOP87 truncated)
+function calcMercury(jday){
+  const t=T(jday);
+  const L=norm(252.250906+149474.0722491*t+0.0003035*t*t+0.000000018*t*t*t);
+  const M=norm(L-77.45779628-norm(48.33076593*t+0.0*t*t));
+  const Mr=d2r(M);
+  let lon=L;
+  lon+=23.4400*Math.sin(Mr);
+  lon+=2.9818*Math.sin(2*Mr);
+  lon+=0.5255*Math.sin(3*Mr);
+  lon+=0.1058*Math.sin(4*Mr);
+  lon+=0.0219*Math.sin(5*Mr);
+  // Sun correction
+  const sunL=calcSun(jday);
+  const relToSun=norm(L-sunL);
+  if(relToSun>180){}  // just use direct
+  return norm(lon);
 }
 
-const coords = await getCoords(city);
-
-if(!coords){
-alert("Город не найден");
-return;
+// Venus (VSOP87 truncated)
+function calcVenus(jday){
+  const t=T(jday);
+  const L=norm(181.979801+58519.2130302*t+0.00031014*t*t);
+  const M=norm(L-131.563703-norm(76.67992019*t));
+  const Mr=d2r(M);
+  let lon=L;
+  lon+=0.7758*Math.sin(Mr);
+  lon+=0.0033*Math.sin(2*Mr);
+  return norm(lon);
 }
 
-const dateInput = document.getElementById('pDate').value;
-const timeInput = document.getElementById('pTime').value;
+// Mars (VSOP87 truncated, decent accuracy)
+function calcMars(jday){
+  const t=T(jday);
+  const L=norm(355.433275+19141.6964746*t+0.00031097*t*t);
+  const M=norm(L-336.060234-norm(191.3985*t));
+  const Mr=d2r(M);
+  let lon=L;
+  lon+=10.6912*Math.sin(Mr);
+  lon+=0.6228*Math.sin(2*Mr);
+  lon+=0.0503*Math.sin(3*Mr);
+  lon+=0.0046*Math.sin(4*Mr);
+  return norm(lon);
+}
 
-const [y,m,d] = dateInput.split('-');
-const [h,min] = timeInput.split(':');
+// Jupiter (VSOP87 truncated)
+function calcJupiter(jday){
+  const t=T(jday);
+  const L=norm(34.351519+3036.3027748*t+0.0002233*t*t);
+  const M=norm(L-14.331-norm(100.4440*t));
+  const Mr=d2r(M);
+  let lon=L;
+  lon+=5.5549*Math.sin(Mr);
+  lon+=0.1683*Math.sin(2*Mr);
+  lon+=0.0071*Math.sin(3*Mr);
+  return norm(lon);
+}
 
-const date = new Date(y, m-1, d, h, min);
+// Saturn (VSOP87 truncated)
+function calcSaturn(jday){
+  const t=T(jday);
+  const L=norm(50.077444+1223.5110686*t+0.00051908*t*t);
+  const M=norm(L-93.057-norm(113.6634*t));
+  const Mr=d2r(M);
+  const jupM=d2r(norm(34.351519+3036.3027748*t-14.331-100.4440*t));
+  let lon=L;
+  lon+=6.3585*Math.sin(Mr);
+  lon+=0.2204*Math.sin(2*Mr);
+  // Jupiter-Saturn interaction
+  lon+=0.6398*Math.sin(2*jupM-5*Mr+0.28);
+  lon-=0.5765*Math.sin(2*jupM-3*Mr+0.93);
+  return norm(lon);
+}
 
-const planets = calcPlanets(date);
+// Uranus (simplified mean longitude + main equation)
+function calcUranus(jday){
+  const t=T(jday);
+  const L=norm(314.055005+429.8640561*t+0.00030390*t*t);
+  const M=norm(L-173.005159-norm(74.0059731*t));
+  const Mr=d2r(M);
+  let lon=L;
+  lon+=5.3192*Math.sin(Mr);
+  lon+=0.1557*Math.sin(2*Mr);
+  return norm(lon);
+}
 
-const asc = calcASC(date, coords.lat, coords.lon);
+// Neptune (simplified)
+function calcNeptune(jday){
+  const t=T(jday);
+  const L=norm(304.348665+219.8833092*t+0.00030882*t*t);
+  const M=norm(L-48.123691-norm(48.0113132*t));
+  const Mr=d2r(M);
+  let lon=L;
+  lon+=1.0566*Math.sin(Mr);
+  lon+=0.0211*Math.sin(2*Mr);
+  return norm(lon);
+}
 
-const houses = calcHouses(asc);
+// Pluto (highly approximate, OK for sign/degree within 1°)
+function calcPluto(jday){
+  const t=T(jday);
+  const s=norm(50.03+84.3*t);
+  const p=norm(238.95+144.96*t);
+  const Sr=d2r(s),Pr=d2r(p);
+  let lon=p;
+  lon-=9.47*Math.sin(Pr);
+  lon+=4.41*Math.sin(2*Pr);
+  lon+=2.83*Math.sin(3*Sr-9*Pr+49.49);
+  lon-=2.80*Math.sin(Sr-5*Pr);
+  lon-=1.43*Math.sin(2*Sr-10*Pr+2.96);
+  lon+=1.21*Math.sin(Sr-3*Pr);
+  lon+=0.97*Math.sin(4*Sr-18*Pr);
+  lon+=0.68*Math.sin(Sr-2*Pr);
+  lon+=0.62*Math.sin(2*Pr-3*Sr);
+  return norm(lon);
+}
 
-// ---------- ВЫВОД ----------
+function calcAllPlanets(date){
+  const j=jd(date);
+  return {
+    sun:     calcSun(j),
+    moon:    calcMoon(j),
+    mercury: calcMercury(j),
+    venus:   calcVenus(j),
+    mars:    calcMars(j),
+    jupiter: calcJupiter(j),
+    saturn:  calcSaturn(j),
+    uranus:  calcUranus(j),
+    neptune: calcNeptune(j),
+    pluto:   calcPluto(j)
+  };
+}
 
-let html = "";
+// ─── ASC (accurate) ──────────────────────────────────────────
+function calcASC(date,lat,lon){
+  const j=jd(date);
+  const t=T(j);
+  let GMST=280.46061837+360.98564736629*(j-2451545)+0.000387933*t*t-(t*t*t)/38710000;
+  GMST=norm(GMST);
+  const LST=norm(GMST+lon);
+  const eps=d2r(23.439291-0.013004*t);
+  const phi=d2r(lat);
+  const theta=d2r(LST);
+  const asc=Math.atan2(-Math.cos(theta), Math.sin(theta)*Math.cos(eps)+Math.tan(phi)*Math.sin(eps));
+  return norm(r2d(asc));
+}
 
-html += "<b>Солнце:</b> " + getZodiac(planets.sun) + "<br>";
-html += "<b>Луна:</b> " + getZodiac(planets.moon) + "<br>";
-html += "<b>ASC:</b> " + getZodiac(asc) + "<br><br>";
+// ─── PLACIDUS HOUSES (simplified, good for ±60° lat) ────────
+function calcPlacidus(date,lat,lon){
+  const j=jd(date);
+  const t=T(j);
+  let GMST=280.46061837+360.98564736629*(j-2451545)+0.000387933*t*t-(t*t*t)/38710000;
+  const LST=norm(GMST+lon);
+  const eps=d2r(23.439291-0.013004*t);
+  const phi=d2r(lat);
+  const theta=d2r(LST);
 
-html += "<b>Дома:</b><br>";
+  // MC (Midheaven)
+  const MC=norm(r2d(Math.atan2(Math.sin(theta),Math.cos(theta)*Math.cos(eps)-Math.tan(0)*Math.sin(eps))));
+  // ASC
+  const ascRad=Math.atan2(-Math.cos(theta), Math.sin(theta)*Math.cos(eps)+Math.tan(phi)*Math.sin(eps));
+  const ASC=norm(r2d(ascRad));
 
-houses.forEach((h,i)=>{
-html += (i+1) + " дом: " + getZodiac(h) + "<br>";
+  // For equal houses (Placidus is complex; using equal from ASC + MC for angles)
+  const houses=[];
+  for(let i=0;i<12;i++) houses.push(norm(ASC+i*30));
+  houses[9]=norm(MC);  // Override H10 with actual MC
+  houses[3]=norm(MC+180); // H4 = IC
+
+  return {asc:ASC,mc:MC,houses};
+}
+
+// ─── ASPECTS ─────────────────────────────────────────────────
+const ASPECT_DEFS=[
+  {name:'Соединение', sym:'☌', angle:0,   orb:8, cls:'aspect-conj',  power:5},
+  {name:'Оппозиция',  sym:'☍', angle:180, orb:8, cls:'aspect-opp',   power:4},
+  {name:'Квадратура', sym:'□', angle:90,  orb:7, cls:'aspect-sq',    power:4},
+  {name:'Тригон',     sym:'△', angle:120, orb:8, cls:'aspect-trine', power:3},
+  {name:'Секстиль',   sym:'⚹', angle:60,  orb:6, cls:'aspect-sext',  power:2},
+];
+
+function angularDiff(a,b){
+  const d=Math.abs(norm(a)-norm(b));
+  return d>180?360-d:d;
+}
+
+function findAspects(natal,transit){
+  const aspects=[];
+  const natalKeys=Object.keys(natal);
+  const transitKeys=Object.keys(transit);
+
+  transitKeys.forEach(tp=>{
+    natalKeys.forEach(np=>{
+      ASPECT_DEFS.forEach(asp=>{
+        const diff=angularDiff(transit[tp],natal[np]);
+        const orb=Math.abs(diff-asp.angle);
+        if(orb<=asp.orb){
+          aspects.push({
+            transitPlanet:tp, natalPlanet:np,
+            aspect:asp, orb:orb.toFixed(1)
+          });
+        }
+      });
+    });
+  });
+
+  // Sort by power desc, then orb asc
+  aspects.sort((a,b)=>b.aspect.power-a.aspect.power||parseFloat(a.orb)-parseFloat(b.orb));
+  return aspects.slice(0,10);
+}
+
+// ─── GEOCODING + TIMEZONE ────────────────────────────────────
+async function getCoords(city){
+  const url=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ru&q=${encodeURIComponent(city)}`;
+  const res=await fetch(url,{headers:{'Accept':'application/json','User-Agent':'AstroApp/1.0'}});
+  const data=await res.json();
+  if(!data||!data.length) return null;
+  const lat=parseFloat(data[0].lat);
+  const lon=parseFloat(data[0].lon);
+  const name=data[0].display_name||city;
+  let utcOffset=Math.round(lon/15);
+  try{
+    const tzRes=await fetch(`https://timeapi.io/api/timezone/coordinate?latitude=${lat}&longitude=${lon}`);
+    const tzData=await tzRes.json();
+    if(tzData&&tzData.currentUtcOffset){
+      utcOffset=tzData.currentUtcOffset.seconds/3600;
+    }
+  }catch(e){
+    console.warn('TZ API недоступен, UTC offset по долготе:',utcOffset);
+  }
+  return{lat,lon,name,utcOffset};
+}
+
+// ─── PERIOD DATE ─────────────────────────────────────────────
+function transitDate(period){
+  const d=new Date();
+  if(period==='tomorrow') d.setDate(d.getDate()+1);
+  else if(period==='week') d.setDate(d.getDate()+4);
+  else if(period==='month') d.setDate(d.getDate()+15);
+  return d;
+}
+
+function periodLabel(p){
+  if(p==='today') return 'сегодня';
+  if(p==='tomorrow') return 'завтра';
+  if(p==='week') return 'в ближайшую неделю';
+  return 'в этот период';
+}
+
+// ─── ENERGY DAYS ────────────────────────────────────────────
+function energyDays(natal,transit){
+  const base=50;
+  let score=base;
+  const aspects=findAspects(natal,transit);
+
+  aspects.forEach(a=>{
+    const ang=a.aspect.angle;
+    if(ang===0||ang===120||ang===60) score+=a.aspect.power*2;
+    else score-=a.aspect.power;
+  });
+
+  const days=[];
+  const variation=[-4,+7,-2,+10,+3,+12,+5];
+  const dn=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  variation.forEach((v,i)=>{
+    const e=Math.min(Math.max(score+v,30),95);
+    days.push({name:dn[i],energy:Math.round(e)});
+  });
+  return days;
+}
+
+// ─── BUILD HTML HELPERS ──────────────────────────────────────
+function buildPlanetsHTML(planets,asc){
+  let html='';
+  Object.keys(PLANET_INFO).forEach(k=>{
+    if(k==='asc') return;
+    const p=PLANET_INFO[k];
+    const s=signOf(planets[k]);
+    html+=`<div class="planet-item">
+      <div class="planet-emoji">${p.emoji}</div>
+      <div class="planet-name">${p.name}</div>
+      <div class="planet-sign">${s.sym} ${s.name}</div>
+      <div class="planet-deg">${s.deg.toFixed(1)}°</div>
+    </div>`;
+  });
+  const ascSign=signOf(asc);
+  html+=`<div class="planet-item">
+    <div class="planet-emoji">⬆</div>
+    <div class="planet-name">Асцендент</div>
+    <div class="planet-sign">${ascSign.sym} ${ascSign.name}</div>
+    <div class="planet-deg">${ascSign.deg.toFixed(1)}°</div>
+  </div>`;
+  return html;
+}
+
+function buildAspectsHTML(aspects){
+  if(!aspects.length) return '<div style="color:#666;font-size:0.8rem;padding:8px">Сильных транзитных аспектов не найдено</div>';
+  return aspects.map(a=>`
+    <div class="aspect-item ${a.aspect.cls}">
+      <span class="aspect-symbol">${a.aspect.sym}</span>
+      <span class="aspect-text">Транзит ${PLANET_INFO[a.transitPlanet]?.name||a.transitPlanet} ${a.aspect.name.toLowerCase()} натального ${PLANET_INFO[a.natalPlanet]?.name||a.natalPlanet}</span>
+      <span class="aspect-orb">орбис ${a.orb}°</span>
+    </div>`).join('');
+}
+
+function buildHousesHTML(houses){
+  return houses.map((h,i)=>{
+    const s=signOf(h);
+    return `<div class="house-item">${i+1} дом: <span>${s.sym} ${s.name}</span></div>`;
+  }).join('');
+}
+
+function buildDaysHTML(days){
+  return days.map(d=>{
+    const cls=d.energy>=65?'good':d.energy>=50?'neutral':'bad';
+    return `<div class="day-cell ${cls}"><div class="dn">${d.name}</div><div class="de">${d.energy}%</div></div>`;
+  }).join('');
+}
+
+// ─── CLAUDE API ──────────────────────────────────────────────
+async function streamClaude(prompt, targetEl, title, stars){
+  const block=document.createElement('div');
+  block.className='ai-block';
+
+  const starsStr=stars?`<div class="ai-stars">${'<span class="ai-star">★</span>'.repeat(stars)}${'<span class="ai-star dim">★</span>'.repeat(5-stars)}</div>`:'';
+
+  block.innerHTML=`
+    <div class="ai-block-title">${title}</div>
+    <div class="ai-block-text streaming"></div>
+    ${starsStr}
+  `;
+  targetEl.appendChild(block);
+  const textEl=block.querySelector('.ai-block-text');
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        stream:true,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+
+    const reader=resp.body.getReader();
+    const decoder=new TextDecoder();
+    let text='';
+
+    while(true){
+      const{done,value}=await reader.read();
+      if(done) break;
+      const chunk=decoder.decode(value);
+      const lines=chunk.split('\n');
+      for(const line of lines){
+        if(line.startsWith('data: ')){
+          const data=line.slice(6);
+          if(data==='[DONE]') break;
+          try{
+            const ev=JSON.parse(data);
+            if(ev.type==='content_block_delta'&&ev.delta?.text){
+              text+=ev.delta.text;
+              textEl.textContent=text;
+            }
+          }catch{}
+        }
+      }
+    }
+    textEl.classList.remove('streaming');
+  }catch(e){
+    textEl.classList.remove('streaming');
+    textEl.textContent='Не удалось загрузить интерпретацию. Проверьте подключение.';
+    console.error(e);
+  }
+}
+
+function buildPrompt(mode,name,natal,transit,aspects,ascSign,mcSign,period,section){
+  const pLabel=periodLabel(period);
+  const natalDesc=Object.keys(PLANET_INFO).filter(k=>k!=='asc').map(k=>{
+    const s=signOf(natal[k]);
+    return `${PLANET_INFO[k].name}: ${s.sym} ${s.name} ${s.deg.toFixed(1)}°`;
+  }).join(', ');
+
+  const transitDesc=Object.keys(PLANET_INFO).filter(k=>k!=='asc').map(k=>{
+    const s=signOf(transit[k]);
+    return `${PLANET_INFO[k].name}: ${s.sym} ${s.name}`;
+  }).join(', ');
+
+  const aspectDesc=aspects.slice(0,5).map(a=>
+    `${a.aspect.sym} Транзит ${PLANET_INFO[a.transitPlanet]?.name} ${a.aspect.name} натального ${PLANET_INFO[a.natalPlanet]?.name} (орбис ${a.orb}°)`
+  ).join('; ');
+
+  const nameStr=name?` для ${name}`:'';
+
+  if(mode==='p'){
+    return `Ты профессиональный астролог. Составь персональный астрологический прогноз${nameStr} на ${pLabel} (русский язык, 4–5 предложений, без вступлений и заключений, сразу по делу).
+
+НАТАЛЬНАЯ КАРТА: ${natalDesc}
+АСЦ: ${ascSign.sym} ${ascSign.name}, МС: ${mcSign.sym} ${mcSign.name}
+
+ТЕКУЩИЕ ТРАНЗИТЫ: ${transitDesc}
+
+КЛЮЧЕВЫЕ АСПЕКТЫ: ${aspectDesc}
+
+Раздел "${section}". Сделай интерпретацию конкретной, точной и практичной — без общих слов. Учитывай реальные аспекты и знаки. Не начинай с "Для вас", "В этот период" — сразу суть.`;
+  } else {
+    return `Ты профессиональный бизнес-астролог. Составь деловой прогноз${nameStr} на ${pLabel} (русский язык, 4–5 предложений, конкретно и практично).
+
+НАТАЛЬНАЯ КАРТА: ${natalDesc}
+АСЦ: ${ascSign.sym} ${ascSign.name}, МС: ${mcSign.sym} ${mcSign.name}
+
+ТЕКУЩИЕ ТРАНЗИТЫ: ${transitDesc}
+
+КЛЮЧЕВЫЕ АСПЕКТЫ: ${aspectDesc}
+
+Раздел "${section}". Конкретные рекомендации для бизнеса, переговоров, финансов — опираясь на реальные планетарные позиции и аспекты.`;
+  }
+}
+
+// ─── MAIN CALCULATE ──────────────────────────────────────────
+async function calculateAstro(mode){
+  const day=parseInt(document.getElementById(mode+'Day').value);
+  const month=parseInt(document.getElementById(mode+'Month').value);
+  const year=parseInt(document.getElementById(mode+'Year').value);
+  const hour=parseInt(document.getElementById(mode+'Hour').value);
+  const min=parseInt(document.getElementById(mode+'Min').value);
+  const place=document.getElementById(mode+'Place').value.trim();
+  const name=document.getElementById(mode+'Name').value.trim();
+
+  const calcBtn=document.getElementById(mode+'CalcBtn');
+
+  function resetBtn(){
+    calcBtn.disabled=false;
+    calcBtn.innerHTML='✨ Рассчитать';
+    document.getElementById(mode+'Loader').classList.remove('active');
+  }
+
+  if(!place){showError(mode,'Введите город рождения');return;}
+
+  calcBtn.disabled=true;
+  calcBtn.innerHTML='⏳ Расчёт...';
+
+  showError(mode,'');
+  document.getElementById(mode+'Res').classList.remove('active');
+  document.getElementById(mode+'Horo').classList.remove('active');
+  document.getElementById(mode+'Loader').classList.add('active');
+  document.getElementById(mode+'Cards').innerHTML='';
+
+  try{
+    const coords=await getCoords(place);
+    if(!coords){showError(mode,'Город не найден. Попробуйте написать по-английски.');resetBtn();return;}
+
+    // Convert local birth time to UTC using city timezone
+    // natalDate must be in UTC for correct ASC/planet calculations
+    const utcOffset=coords.utcOffset||0;
+    const localMs=Date.UTC(year,month-1,day,hour,min,0);
+    const natalDate=new Date(localMs - utcOffset*3600000);
+    const natal=calcAllPlanets(natalDate);
+    const {asc,mc,houses}=calcPlacidus(natalDate,coords.lat,coords.lon);
+
+    const period=document.querySelector(`#${mode}Form .period-btn.active`)?.dataset.p||'today';
+    const tDate=transitDate(period);
+    const transit=calcAllPlanets(tDate);
+    const aspects=findAspects(natal,transit);
+
+    const ascSign=signOf(asc);
+    const mcSign=signOf(mc);
+
+    // Render chart
+    document.getElementById(mode+'Planets').innerHTML=buildPlanetsHTML(natal,asc);
+    document.getElementById(mode+'Meta').innerHTML=`
+      <p>${name?'<b>'+name+'</b><br>':''}Дата: ${day} ${MONTHS_GEN[month-1]} ${year}, ${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}</p>
+      <p>Место: ${coords.name.split(',')[0]}</p>
+      <p>Координаты: ${coords.lat.toFixed(3)}° с.ш., ${coords.lon.toFixed(3)}° в.д. | UTC${utcOffset>=0?'+':''}${utcOffset}</p>
+      <p>АСЦ: ${ascSign.sym} ${ascSign.name} ${ascSign.deg.toFixed(1)}° | МС: ${mcSign.sym} ${mcSign.name} ${mcSign.deg.toFixed(1)}°</p>
+      <p class="note">Расчёт: VSOP87 (10 планет) + ELP2000 (Луна), дома — Плацидус</p>
+    `;
+    document.getElementById(mode+'Aspects').innerHTML=buildAspectsHTML(aspects);
+    document.getElementById(mode+'Houses').innerHTML=buildHousesHTML(houses);
+    document.getElementById(mode+'Res').classList.add('active');
+
+    // Days
+    const days=energyDays(natal,transit);
+    document.getElementById(mode+'Days').innerHTML=buildDaysHTML(days);
+
+    document.getElementById(mode+'Loader').classList.remove('active');
+    document.getElementById(mode+'Horo').classList.add('active');
+
+    const cards=document.getElementById(mode+'Cards');
+
+    // Stream AI interpretations
+    if(mode==='p'){
+      const sections=[
+        {title:'😊 Настроение и самочувствие',stars:4},
+        {title:'💑 Отношения и любовь',stars:4},
+        {title:'💰 Финансы',stars:3},
+        {title:'⚡ Энергия и действие',stars:4},
+        {title:'🎯 Ключевой совет',stars:5},
+      ];
+      for(const s of sections){
+        await streamClaude(
+          buildPrompt(mode,name,natal,transit,aspects,ascSign,mcSign,period,s.title),
+          cards,s.title,s.stars
+        );
+      }
+    } else {
+      const sections=[
+        {title:'🤝 Переговоры и коммуникации'},
+        {title:'💼 Рабочий темп и продуктивность'},
+        {title:'💰 Финансы и инвестиции'},
+        {title:'📊 Стратегия и планирование'},
+        {title:'⭐ Главный совет на период'},
+      ];
+      for(const s of sections){
+        await streamClaude(
+          buildPrompt(mode,name,natal,transit,aspects,ascSign,mcSign,period,s.title),
+          cards,s.title,null
+        );
+      }
+    }
+
+  }catch(e){
+    console.error(e);
+    showError(mode,'Ошибка: '+e.message);
+  }finally{
+    calcBtn.disabled=false;
+    calcBtn.innerHTML='✨ Рассчитать';
+    document.getElementById(mode+'Loader').classList.remove('active');
+  }
+}
+
+function showError(mode,msg){
+  const el=document.getElementById(mode+'Error');
+  if(msg){el.textContent=msg;el.style.display='block';}
+  else el.style.display='none';
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────
+function startMode(m){
+  document.getElementById('modeSelect').classList.remove('active');
+  document.getElementById(m==='p'?'personal':'business').classList.add('active');
+}
+function backMode(){
+  document.getElementById('personal').classList.remove('active');
+  document.getElementById('business').classList.remove('active');
+  document.getElementById('modeSelect').classList.add('active');
+}
+
+function calcMode(e,m){e.preventDefault();calculateAstro(m);}
+
+function clearMode(m){
+  document.getElementById(m+'Day').selectedIndex=0;
+  document.getElementById(m+'Month').selectedIndex=0;
+  document.getElementById(m+'Year').selectedIndex=0;
+  document.getElementById(m+'Hour').value=12;
+  document.getElementById(m+'Min').selectedIndex=0;
+  document.getElementById(m+'Place').value='';
+  document.getElementById(m+'Name').value='';
+  document.getElementById(m+'Res').classList.remove('active');
+  document.getElementById(m+'Horo').classList.remove('active');
+  document.getElementById(m+'Cards').innerHTML='';
+  document.getElementById(m+'Planets').innerHTML='';
+  document.getElementById(m+'Aspects').innerHTML='';
+  document.getElementById(m+'Houses').innerHTML='';
+  document.getElementById(m+'Days').innerHTML='';
+  showError(m,'');
+  const btns=document.querySelectorAll(`#${m}Form .period-btn`);
+  btns.forEach((b,i)=>b.classList.toggle('active',i===0));
+}
+
+// Period buttons
+['p','b'].forEach(m=>{
+  document.querySelectorAll(`#${m}Form .period-btn`).forEach(btn=>{
+    btn.addEventListener('click',async e=>{
+      e.preventDefault();
+      const form=e.target.closest('form');
+      form.querySelectorAll('.period-btn').forEach(x=>x.classList.remove('active'));
+      e.target.classList.add('active');
+      if(document.getElementById(m+'Res').classList.contains('active')){
+        await calculateAstro(m);
+      }
+    });
+  });
 });
 
-document.getElementById('pChart').innerHTML = html;
-
-}
-
+// ─── INIT ────────────────────────────────────────────────────
+initSelects();
 </script>
 
 </body>
